@@ -1,3 +1,4 @@
+from os import walk
 import numpy as np
 
 
@@ -204,8 +205,68 @@ class linear_regression:
             rtn_val = M_inv @ _Xt @ y  # Perform MAP Estimate
         else:
             raise ValueError("Incorrect value for _type")
-
         return rtn_val
 
     def mean_absolute_error(self, y_true: np.ndarray, y_pred: np.ndarray):
         return np.mean(np.abs(y_true - y_pred))
+
+
+class logistic_regression:
+    has_param = False
+    vec_theta = np.array([])
+
+    def __init__(self, hyper_param: dict) -> None:
+        self.hyper_param = hyper_param
+
+        keys_needed = [
+            "alpha",
+            "tau",
+            "max_iter",
+        ]  # Keeping this as a list in case I need more
+        if not all(key in hyper_param for key in keys_needed):
+            raise AttributeError("Missing parameter(s) in hyper_param")
+
+    def get_param(self, param):
+        """Return a single or list of parameters bases on param.
+
+        keywords:
+        param -- determine what to return:
+                 A single value => return 1 element of the parameters list.
+                 Tuple (start, end) => Return values from start-th elements
+                 to end-th elements.
+        """
+        if isinstance(param, int):
+            return self.vec_theta[param]
+        elif isinstance(param, tuple) and len(param) == 2:
+            start, end = param
+            return self.vec_theta[start:end]
+        else:
+            raise TypeError("Param must be an int or a tuple of two elements.")
+
+    def train(self, X: np.ndarray, y: np.ndarray):
+        if not np.any(X):
+            raise ValueError("X cannot be empty")
+        if not np.any(y):
+            raise ValueError("Y cannot be empty")
+
+        # Append 1's to X
+        ones = np.ones((X.shape[0], 1))
+        X = np.append(X, ones, axis=1)
+
+        pass
+
+    def test(self):
+        pass
+
+    def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
+        m, n = X.shape  # m: numbers of rows, n: number of n_features
+        theta = np.random.rand(n)
+        theta_prev = np.empty(n)
+
+        for i in range(max_iter):
+            theta_prev = theta.copy()
+            pass
+        pass
+
+    def compute_gradient(self, X: np.ndarray, y: np.ndarray, theta):
+        pass

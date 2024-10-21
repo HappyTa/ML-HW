@@ -1,5 +1,5 @@
 from sklearn.datasets import fetch_california_housing
-from q1_d import linear_regression
+from ml import linear_regression
 import numpy as np
 import sys
 
