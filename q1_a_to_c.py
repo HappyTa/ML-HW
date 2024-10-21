@@ -13,11 +13,11 @@ to integrate them effectively.
 """=========================================================================="""
 
 """Question B"""
-import numpy as np
+import numpy as np  # noqa: E402
 
 
 class q1BClass:
-    def __init__(self, parameters: np.array, hyperparameters: dict):
+    def __init__(self, parameters: np.ndarray, hyperparameters: dict):
         """__init__ function for this class.
 
         keywords:
