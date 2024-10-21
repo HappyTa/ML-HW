@@ -56,13 +56,13 @@ class linear_regression:
 
         # Select Linear Regression "Flavor"
         if self.hyper_param["type"] == 0:  # MLE
-            print(f"Training: MLE (Input include: {self.hyper_param}, {X}, {y})")
+            print(f"\nTraining: MLE (Input include: {self.hyper_param}, {X}, {y})")
 
             self.vec_theta = self.get_theta(X, y, _type)
             self.has_param = True
 
         elif self.hyper_param["type"] == 1:  # MAP Estimation:
-            print(f"Training: MAP (Input include: {self.hyper_param}, {X}, {y})")
+            print(f"\nTraining: MAP (Input include: {self.hyper_param}, {X}, {y})")
 
             self.vec_theta = self.get_theta(X, y, _type, sigma2, b2, _lambda)
             self.has_param = True
@@ -91,7 +91,7 @@ class linear_regression:
 
         if np.any(y):  # Test time???
             test_result = self.mean_absolute_error(y, vec_z)
-            print(f"Mean absolute error: {test_result}")
+            print(f"\nMean absolute error: {test_result}")
 
         return vec_z
 
@@ -172,7 +172,7 @@ class linear_regression:
                 raise ValueError("Sigma2 and Lambda cannot be lower than 0.")
             if _lambda != sigma2 / b2 and _type != 0:
                 print(
-                    "The equality between lambda and sigma2/b2 does not hold. Recalculating lambda."
+                    "\nThe equality between lambda and sigma2/b2 does not hold. Recalculating lambda."
                 )
                 _lambda = sigma2 / b2
                 print(f"New lambda: {_lambda}")
@@ -212,12 +212,11 @@ class linear_regression:
 
 
 class logistic_regression:
+    hyper_param = {}
     has_param = False
-    vec_theta = np.array([])
+    final_theta = np.array([])
 
     def __init__(self, hyper_param: dict) -> None:
-        self.hyper_param = hyper_param
-
         keys_needed = [
             "alpha",
             "tau",
@@ -225,6 +224,8 @@ class logistic_regression:
         ]  # Keeping this as a list in case I need more
         if not all(key in hyper_param for key in keys_needed):
             raise AttributeError("Missing parameter(s) in hyper_param")
+
+        self.hyper_param = hyper_param
 
     def get_param(self, param):
         """Return a single or list of parameters bases on param.
@@ -236,10 +237,10 @@ class logistic_regression:
                  to end-th elements.
         """
         if isinstance(param, int):
-            return self.vec_theta[param]
+            return self.final_theta[param]
         elif isinstance(param, tuple) and len(param) == 2:
             start, end = param
-            return self.vec_theta[start:end]
+            return self.final_theta[start:end]
         else:
             raise TypeError("Param must be an int or a tuple of two elements.")
 
@@ -253,20 +254,72 @@ class logistic_regression:
         ones = np.ones((X.shape[0], 1))
         X = np.append(X, ones, axis=1)
 
-        pass
+        # Time to descent
+        gd = self.gradient_descent(
+            X,
+            y,
+            self.hyper_param["alpha"],
+            self.hyper_param["tau"],
+            self.hyper_param["max_iter"],
+        )
 
-    def test(self):
-        pass
+        if gd:
+            self.has_param = True
+            self.final_theta = gd
+
+        print(f"\nTheta: {gd}")
 
     def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
+        # TODO: Add docstring
         m, n = X.shape  # m: numbers of rows, n: number of n_features
         theta = np.random.rand(n)
         theta_prev = np.empty(n)
 
         for i in range(max_iter):
             theta_prev = theta.copy()
-            pass
-        pass
+
+            gradient = self.compute_gradient(X, y, theta_prev)
+
+            theta = theta_prev - (alpha * gradient)
+
+            # Check for convergence
+            diff = np.linalg.norm(theta - theta_prev)
+            if diff < tau:
+                print(f"convergence reached after {i} iteration. theta: {theta}")
+                return theta
+
+        if not self.has_param:  # Ran for max_iter times
+            print(f"Maximum number of iteration reached, using latest theta: {theta}")
+            return theta
 
     def compute_gradient(self, X: np.ndarray, y: np.ndarray, theta):
-        pass
+        # TODO: Add docstring
+        gradient = np.zeros(self.final_theta.shape)
+
+        for r in range(len(X)):
+            X_r = X[r, :]
+            y_r = y[r, :]
+
+            p = self.predict_probablility(X_r, theta)
+
+            diff = p - y_r
+
+            for i in range(len(y)):
+                gradient[i] += diff * X_r[i]
+
+        return gradient
+
+    def predict_probablility(self, X: np.ndarray, theta):
+        # TODO: Add docstring
+        if not self.has_param:
+            raise ValueError(
+                "Parameter has not been learn, please run the train() function first."
+            )
+        if not np.any(X):
+            raise ValueError("X cannot be empty")
+
+        z = np.dot(X, theta)
+
+        prob = 1 / (1 + np.exp(-z))
+
+        return prob

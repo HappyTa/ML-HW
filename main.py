@@ -4,10 +4,44 @@ import numpy as np
 import sys
 
 
-def main(_type, b2=1.0, _lambda=0.0):
+def main(_type):
+    # Fetch data
     data = fetch_california_housing(as_frame=True).frame
     X = data.iloc[:, :-1].to_numpy()  # grab all columns except "MedHouseVal" for X
     y = data.iloc[:, -1:].to_numpy()  # Assigning "MedHouseVal" as Target
+
+    # Determine which algorithm the user wants
+    if _type == 0:  # Linear Regression
+        flavor = input(
+            'Please select the "flavor" of Linear Regression (0: MLE, 1: MAP):'
+        )
+
+        sigma2 = 0.0
+        b2 = 1.0
+        _lambda = 0.0
+        if flavor == 1:  # MAP Estimation
+            b2 = input("b^2 = ")
+            _lambda = input("lambda = ")
+
+            theta_ols = np.linalg.inv(X.T @ X) @ X.T @ y
+
+            y_pred_ols = X @ theta_ols
+            sigma2 = np.mean((y - y_pred_ols) ** 2)
+            print(f"sigma^2 will be: {sigma2}")
+
+        hyper_param = {"type": _type, "sigma2": sigma2, "b2": b2, "lambda": _lambda}
+
+        lr = linear_regression(hyper_param)
+
+        vec_theta = lr.train(X, y)
+
+        vec_z = lr.predict(X, y)
+        pass
+    elif _type == 1:  # Logistic Regression
+        pass
+    else:
+        print("\nInvalid algorithm selected, type can only be 0 or 1 ")
+        sys.exit(0)
 
     # Find sigma2
     sigma2 = 0
