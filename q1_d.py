@@ -71,21 +71,27 @@ class linear_regression:
 
         print(f"theta: {self.vec_theta}\n")
 
-    def predict(self, X: np.ndarray):
+    def predict(self, X: np.ndarray, y: np.ndarray = np.array([])):
         """Peform prediction
 
         Return a prediction of vector zeta.
         keywords:
         X (np.ndarray) -- Testing Data
+        y (optional)   -- Setting y will activate test mode
         """
         if not self.has_param:
             raise ValueError(
-                "Parameter has not been set, please run the train() function first."
+                "Parameter has not been learn, please run the train() function first."
             )
         if not np.any(X):
             raise ValueError("X cannot be empty")
 
         vec_z = X @ self.vec_theta
+
+        if np.any(y):  # Test time???
+            test_result = self.mean_absolute_error(y, vec_z)
+            print(f"Mean absolute error: {test_result}")
+
         return vec_z
 
     def get_param(self, param):
@@ -168,6 +174,7 @@ class linear_regression:
                     "The equality between lambda and sigma2/b2 does not hold. Recalculating lambda."
                 )
                 _lambda = sigma2 / b2
+                print(f"New lambda: {_lambda}")
 
         # Training Dojo
         rtn_val = 0
@@ -199,3 +206,6 @@ class linear_regression:
             raise ValueError("Incorrect value for _type")
 
         return rtn_val
+
+    def mean_absolute_error(self, y_true: np.ndarray, y_pred: np.ndarray):
+        return np.mean(np.abs(y_true - y_pred))
