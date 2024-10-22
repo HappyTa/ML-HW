@@ -1,4 +1,3 @@
-from os import walk
 import numpy as np
 
 
@@ -268,6 +267,9 @@ class logistic_regression:
             self.final_theta = gd
 
         print(f"\nTheta: {gd}")
+
+    def test(self):
+        raise NotImplementedError("test has not been implement.")
 
     def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
         # TODO: Add docstring
