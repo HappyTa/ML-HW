@@ -8,9 +8,9 @@ from ml import linear_regression, logistic_regression
 
 def main(_type):
     # Fetch data
-    data = fetch_california_housing(as_frame=True).frame
-    X = data.iloc[:, :-1].to_numpy()  # grab all columns except "MedHouseVal" for X
-    y = data.iloc[:, -1:].to_numpy()  # Assigning "MedHouseVal" as Target
+    data = fetch_california_housing(as_frame=True)
+    X = data.data.to_numpy()  # Assigning all columns except "MedHouseVal" for Xgrab all columns except "MedHouseVal" for X
+    y = data.target.to_numpy()  # Assigning "MedHouseVal" as Target
 
     # Determine which algorithm the user wants
     if _type == 0:  # Linear Regression
@@ -42,14 +42,36 @@ def main(_type):
         pass
     elif _type == 1:  # Logistic Regression
         print("Logistic Regression Selected\n")
-        alpha = input("Please provice the step size (alpha): ")
-        tau = input("Please provide the convergence threshold (tau): ")
-        max_iter = input("Please provide the maximum number of iterations (m): ")
+
+        # Encode y with any value above 2.0685 will be 1 else 0
+        y = np.where(y > 2.0685, 1, 0)
+
+        # Check for debug mode
+        gettrace = getattr(sys, "gettrace", None)
+        if gettrace is None:
+            alpha = input("Please provice the step size (alpha): ")
+            tau = input("Please provide the convergence threshold (tau): ")
+            max_iter = input("Please provide the maximum number of iterations (m): ")
+        else:
+            alpha = 0.01
+            tau = 1e-6
+            max_iter = 1000
+            print(
+                f"DEBUG DETECTED: alpha = {alpha}, tau = {tau}, max_iter = {max_iter}"
+            )
+        # Grab Hyper Parameters
+
+        # Convert user input into floats
+        alpha = float(alpha)
+        tau = float(tau)
+        max_iter = int(max_iter)
 
         hyper_param = {"alpha": alpha, "tau": tau, "max_iter": max_iter}
 
+        # Regression timeee
         los = logistic_regression(hyper_param)
 
+        # Train time
         train = los.train(X, y)
         pass
     else:
@@ -78,9 +100,9 @@ if __name__ == "__main__":
     passed in, this will run MLE.
 
     Acceptable Arguments:
-    type (int| Optional) -- Determine if we are doing MLE or MAP
-    b2 (Optional)        -- Determine b2 for MAP Estimation
-    lambda (Optional)    -- Determine lambda for MAP Estimation
+    type (int| Optional) -- Determine if we are doing Linear or Logistic Regressions
+                            0 => Linear Regression
+                            1 => Logistic Regression
     """
     _type = 0
     if sys.argv[1]:

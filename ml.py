@@ -272,55 +272,57 @@ class logistic_regression:
         raise NotImplementedError("test has not been implement.")
 
     def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
-        # TODO: Add docstring
-        m, n = X.shape  # m: numbers of rows, n: number of n_features
-        theta = np.random.rand(n)
+        # TODO: Write docstring
+        n = X.shape[1]  # Number of n_features
+
+        theta = np.random.rand(n)  # Set initial theta
         theta_prev = np.empty(n)
 
         for i in range(max_iter):
             theta_prev = theta.copy()
 
             gradient = self.compute_gradient(X, y, theta_prev)
-
             theta = theta_prev - (alpha * gradient)
 
             # Check for convergence
-            diff = np.linalg.norm(theta - theta_prev)
+            diff = np.linalg.norm(theta - theta_prev, 2)
+            print(f"iter: {i} diff: {diff}")
             if diff < tau:
-                print(f"convergence reached after {i} iteration. theta: {theta}")
+                print(
+                    f"convergence reached after {i} iteration. self.big_theta: {theta}"
+                )
                 return theta
 
         if not self.has_param:  # Ran for max_iter times
             print(f"Maximum number of iteration reached, using latest theta: {theta}")
             return theta
 
-    def compute_gradient(self, X: np.ndarray, y: np.ndarray, theta):
+    def compute_gradient(self, X: np.ndarray, y: np.ndarray, theta_prev):
         # TODO: Add docstring
-        gradient = np.zeros(self.final_theta.shape)
+        gradient = np.zeros(theta_prev.shape)
 
         for r in range(len(X)):
             X_r = X[r, :]
-            y_r = y[r, :]
+            y_r = y[r]
 
-            p = self.predict_probablility(X_r, theta)
+            p = self.predict_probablility(X_r, theta_prev)
 
             diff = p - y_r
 
-            for i in range(len(y)):
+            for i in range(len(theta_prev)):
                 gradient[i] += diff * X_r[i]
 
         return gradient
 
-    def predict_probablility(self, X: np.ndarray, theta):
+    def predict_probablility(self, X: np.ndarray, theta_prev):
         # TODO: Add docstring
-        if not self.has_param:
-            raise ValueError(
-                "Parameter has not been learn, please run the train() function first."
-            )
+        # if not theta_prev:
+        #     raise ValueError("Missing Theta.")
+
         if not np.any(X):
             raise ValueError("X cannot be empty")
 
-        z = np.dot(X, theta)
+        z = np.dot(X, theta_prev)
 
         prob = 1 / (1 + np.exp(-z))
 
