@@ -1,4 +1,3 @@
-from os import walk
 import numpy as np
 
 
@@ -286,7 +285,24 @@ class logistic_regression:
         return labels
 
     def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
-        # TODO: Write docstring
+        """Perform gradient gradient_descent
+
+        Keywords:
+        X (np.ndarray) -- Input matrix, shape (n_samples, n_features).
+        y (np.ndarray) -- Target vector, shape (n_samples).
+        alpha (float)  -- Learning rate. Control the step size in the parameter
+                          space during gradient descent.
+        tau (float)    -- convergence threshold. Detemind when we stop descending.
+        max_iter (int) -- The maximum number of iterations for gradient descent.
+
+        Returns:
+        theta (np.ndarray) -- The optimized parameters after convergence or
+                              when we reach the maxium number of iterations
+
+        Note:
+
+        When called, this function will intialize theta and return the optmized version of theta.
+        """
         n = X.shape[1]  # Number of n_features
 
         theta = np.random.rand(n)  # Set initial theta
