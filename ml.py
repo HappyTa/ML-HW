@@ -57,13 +57,13 @@ class linear_regression:
         if self.hyper_param["type"] == 0:  # MLE
             print(f"\nTraining: MLE (Input include: {self.hyper_param}, {X}, {y})")
 
-            self.vec_theta = self.get_theta(X, y, _type)
+            self.vec_theta = self.calc_theta(X, y, _type)
             self.has_param = True
 
         elif self.hyper_param["type"] == 1:  # MAP Estimation:
             print(f"\nTraining: MAP (Input include: {self.hyper_param}, {X}, {y})")
 
-            self.vec_theta = self.get_theta(X, y, _type, sigma2, b2, _lambda)
+            self.vec_theta = self.calc_theta(X, y, _type, sigma2, b2, _lambda)
             self.has_param = True
 
         else:
@@ -87,10 +87,6 @@ class linear_regression:
             raise ValueError("X cannot be empty")
 
         vec_z = X @ self.vec_theta
-
-        if np.any(y):  # Test time???
-            test_result = self.mean_absolute_error(y, vec_z)
-            print(f"\nMean absolute error: {test_result}")
 
         return vec_z
 
@@ -135,7 +131,7 @@ class linear_regression:
             raise ValueError("Param must be an a key or a tuple of two keys.")
 
     # def get_theta(self, X: np.ndarray, y: np.ndarray, sigma2=0, b2=1, lamb=0, type=0):
-    def get_theta(self, X: np.ndarray, y: np.ndarray, _type=0, *argv):
+    def calc_theta(self, X: np.ndarray, y: np.ndarray, _type=0, *argv):
         """Peform either MLE or MAP Estimation to find Theta.
 
         By default, this method does not care about sigma2, b2, or lambda, this
@@ -206,9 +202,6 @@ class linear_regression:
             raise ValueError("Incorrect value for _type")
         return rtn_val
 
-    def mean_absolute_error(self, y_true: np.ndarray, y_pred: np.ndarray):
-        return np.mean(np.abs(y_true - y_pred))
-
 
 class logistic_regression:
     hyper_param = {}
@@ -262,13 +255,19 @@ class logistic_regression:
             self.hyper_param["max_iter"],
         )
 
-        if gd:
+        if gd.size != 0:
             self.has_param = True
             self.final_theta = gd
 
-        print(f"\nTheta: {gd}")
+        print(f"\nFinal Theta: {gd}")
 
     def predict(self, X: np.ndarray):
+        """Predict binary class labels X using learned parameter (self.final_theta)
+        from logistic regression
+
+        Parameter:
+        X (np.ndarray) -- 2D Numpy array that contain the training data
+        """
         if not self.has_param:
             raise ValueError(
                 "Parameter has not been learn, please run the train() function first."
@@ -281,6 +280,8 @@ class logistic_regression:
         vec_p = self.predict_probablility(X, self.final_theta)
 
         labels = (vec_p >= 0.5).astype(int)
+
+        print(f"Final Labels: {labels}")
 
         return labels
 
@@ -316,7 +317,7 @@ class logistic_regression:
 
             # Check for convergence
             diff = np.linalg.norm(theta - theta_prev, 2)
-            print(f"iter: {i} diff: {diff}")
+            # print(f"iter: {i} diff: {diff}")
             if diff < tau:
                 print(
                     f"convergence reached after {i} iteration. self.big_theta: {theta}"
@@ -328,7 +329,16 @@ class logistic_regression:
             return theta
 
     def compute_gradient(self, X: np.ndarray, y: np.ndarray, theta_prev):
-        # TODO: Add docstring
+        """Calculate the gradient
+
+        parameters:
+        X (np.ndarray)          -- Input matrix, shape (n_samples, n_features).
+        y (np.ndarray)          -- Target vector, shape (n_samples).
+        theta_prev (np.ndarray) -- The current version of the parameter
+
+        Returns:
+        gradient                -- Return the Gradient
+        """
         gradient = np.zeros(theta_prev.shape)
 
         for r in range(len(X)):

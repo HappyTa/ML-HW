@@ -6,13 +6,15 @@ from sklearn.datasets import fetch_california_housing
 from ml import linear_regression, logistic_regression
 
 
+def mean_absolute_error(y_true: np.ndarray, y_pred: np.ndarray):
+    return np.mean(np.abs(y_true - y_pred))
+
+
 def main(_type):
     # Fetch data
     data = fetch_california_housing(as_frame=True)
-    X = (
-        data.data.to_numpy()
-    )  # Assigning all columns except "MedHouseVal" for Xgrab all columns except "MedHouseVal" for X
-    y = data.target.to_numpy()  # Assigning "MedHouseVal" as Target
+    X = data.data.to_numpy()
+    y = data.target.to_numpy()
 
     # Determine which algorithm the user wants
     if _type == 0:  # Linear Regression
@@ -41,7 +43,12 @@ def main(_type):
         vec_theta = lr.train(X, y)
 
         vec_z = lr.predict(X, y)
-        pass
+
+        # Testing
+        test = mean_absolute_error(vec_z, y)
+        print(f"mean_absolute_error: {test}")
+
+        sys.exit(0)
     elif _type == 1:  # Logistic Regression
         print("Logistic Regression Selected\n")
 
@@ -71,27 +78,15 @@ def main(_type):
         los = logistic_regression(hyper_param)
 
         # Train time
-        train = los.train(X, y)
+        los.train(X, y)
+
+        # Predict
+        labels = los.predict(X)
+
         pass
     else:
         print("\nInvalid algorithm selected, type can only be 0 or 1 ")
         sys.exit(0)
-
-    # Find sigma2
-    # sigma2 = 0
-    # if _type == 1:  # MAP Estimation
-    #     theta_ols = np.linalg.inv(X.T @ X) @ X.T @ y
-    #
-    #     y_pred_ols = X @ theta_ols
-    #     sigma2 = np.mean((y - y_pred_ols) ** 2)
-    #
-    # hyper_param = {"type": _type, "sigma2": sigma2, "b2": b2, "lambda": _lambda}
-    #
-    # lr = linear_regression(hyper_param)
-    #
-    # vec_theta = lr.train(X, y)
-    #
-    # vec_z = lr.predict(X, y)
 
 
 if __name__ == "__main__":
