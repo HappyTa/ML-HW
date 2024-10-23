@@ -22,7 +22,6 @@ def split_dataset(
     if random_seed is not None:
         np.random.seed(random_seed)
 
-    # Shuffle the data
     indices = np.arange(data.shape[0])
     np.random.shuffle(indices)
 

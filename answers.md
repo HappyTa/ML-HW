@@ -135,6 +135,10 @@ appropriate for parameters, and why?
 
 ### Question A
 
+#### III
+
+![Alt text](Figure_1.png)
+
 #### IV
 
 Interpretation of $\theta_n$:
@@ -148,3 +152,16 @@ Interpretation of $\theta_n$:
 ### Question B
 
 #### I
+
+Using **Regularization** as my "flavor" for linear regression, I got:
+
+- Number of 1's: 12197
+- Number of 0's: 8443
+
+With 1's accounting for 59.09% and 0's for 50.91%, this seems reasonable to me. In Section III of this question, I observed that when regularization was performed using nearly all the data (99%), the RMSE was around 50%. Given this, I wasn’t too surprised to see values close to 50% here.
+
+#### II
+
+Since we are trying to predict the **ground truth**, using it will introduce data leakage during training that would not appear in real-world problem.
+
+#### III

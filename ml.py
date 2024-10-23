@@ -251,10 +251,10 @@ class logistic_regression:
                 "Parameter has not been learn, please run the train() function first."
             )
         if isinstance(param, int):
-            return self.final_theta[param]
+            return self.final_theta[param]  # type: ignore
         elif isinstance(param, tuple) and len(param) == 2:
             start, end = param
-            return self.final_theta[start:end]
+            return self.final_theta[start:end]  # type: ignore
         else:
             raise TypeError("Param must be an int or a tuple of two elements.")
 
