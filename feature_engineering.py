@@ -1,9 +1,10 @@
+import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_california_housing
-from sklearn.model_selection import train_test_split
+from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.preprocessing import StandardScaler
 
-import matplotlib.pyplot as plt
 from ml import linear_regression, logistic_regression
 
 
@@ -46,8 +47,11 @@ def split_dataset(
     return X_train, X_test, y_train, y_test
 
 
-def logistic_regression_prediction(X: np.ndarray, y: np.ndarray):
-    training_percentages = [0.1, 0.2, 0.4, 0.6, 0.8, 0.999]
+def logistic_regression_prediction(
+    X: np.ndarray, y: np.ndarray, training_percentages: list
+):
+    scale = StandardScaler()
+    X = scale.fit_transform(X)
     lor_hp = {"alpha": 0.08, "tau": 1e-4, "max_iter": 1000}
     rtn_val = []
     for pct in training_percentages:
@@ -61,11 +65,10 @@ def logistic_regression_prediction(X: np.ndarray, y: np.ndarray):
         X_train, X_test = X[train_indices], X[test_indices]
         y_train, y_test = y[train_indices], y[test_indices]
 
-        # MLE
         lor = logistic_regression(lor_hp)
         lor.train(X_train, y_train)
         labels = lor.predict(X_test)
-        rtn_val.append(labels)
+        rtn_val.append((labels, y_test))
 
     return rtn_val
 
@@ -95,7 +98,26 @@ def feature_engineering():
     print(f"precentage of 0: {percentage_0:.2f}% \n")
 
     # logistic_regression prediction
-    temp = logistic_regression_prediction(X, data["willing_to_purchase"].to_numpy())
+    y_true = data["willing_to_purchase"].to_numpy()
+    training_percentages = [0.1, 0.2, 0.4, 0.6, 0.8, 0.999]
+    pred_labels_list = logistic_regression_prediction(X, y_true, training_percentages)
+    print()
+    # Create a figure with 6 subplots (2 rows, 3 columns)
+    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
+
+    # Loop through each set of predictions and plot the confusion matrix
+    for i, labels in enumerate(pred_labels_list):
+        cm = confusion_matrix(labels[0], labels[1])
+        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+
+        # Determine which subplot to use (row and column indices)
+        row, col = divmod(i, 3)
+        disp.plot(ax=axes[row, col], cmap=plt.cm.Blues)
+        axes[row, col].set_title(f"Used {training_percentages[i]}% for Training")
+
+    # Adjust layout
+    plt.tight_layout()
+    plt.show()
 
 
 if __name__ == "__main__":
