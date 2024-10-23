@@ -2,6 +2,7 @@ import sys
 
 import numpy as np
 from sklearn.datasets import fetch_california_housing
+from sklearn.preprocessing import StandardScaler
 
 from ml import linear_regression, logistic_regression
 
@@ -13,8 +14,8 @@ def mean_absolute_error(y_true: np.ndarray, y_pred: np.ndarray):
 def main(_type):
     # Fetch data
     data = fetch_california_housing(as_frame=True)
-    X = data.data.to_numpy()
-    y = data.target.to_numpy()
+    X = data.data.to_numpy()  # type: ignore
+    y = data.target.to_numpy()  # type: ignore
 
     # Determine which algorithm the user wants
     if _type == 0:  # Linear Regression
@@ -22,45 +23,42 @@ def main(_type):
         flavor = input(
             'Please select the "flavor" of Linear Regression (0: MLE, 1: MAP):'
         )
+        flavor = int(flavor)
 
-        sigma2 = 0.0
-        b2 = 1.0
-        _lambda = 0.0
+        sigma2 = 0.001
+        b2 = 1
+        _lambda = 0.001
         if flavor == 1:  # MAP Estimation
-            b2 = input("b^2 = ")
-            _lambda = input("lambda = ")
+            if not __debug__:
+                sigma2 = input("Please provide the value of sigma^2 = ")
+                b2 = input("Please provide the value of b^2 = ")
+        if flavor == 2: # Regularized
 
-            theta_ols = np.linalg.inv(X.T @ X) @ X.T @ y
 
-            y_pred_ols = X @ theta_ols
-            sigma2 = np.mean((y - y_pred_ols) ** 2)
-            print(f"sigma^2 will be: {sigma2}")
-
-        hyper_param = {"type": _type, "sigma2": sigma2, "b2": b2, "lambda": _lambda}
+        hyper_param = {"type": flavor, "sigma2": sigma2, "b2": b2, "lambda": _lambda}
 
         lr = linear_regression(hyper_param)
 
-        vec_theta = lr.train(X, y)
+        lr.train(X, y)
 
-        vec_z = lr.predict(X, y)
-
-        # Testing
-        test = mean_absolute_error(vec_z, y)
-        print(f"mean_absolute_error: {test}")
+        y_predict = lr.predict(X)
 
         sys.exit(0)
     elif _type == 1:  # Logistic Regression
         print("Logistic Regression Selected\n")
 
+        scaler = StandardScaler()
+
+        X = scaler.fit_transform(X)
+
         # Check for debug mode
-        gettrace = getattr(sys, "gettrace", None)
-        if gettrace is None:
+        if not __debug__:
             alpha = input("Please provice the step size (alpha): ")
             tau = input("Please provide the convergence threshold (tau): ")
             max_iter = input("Please provide the maximum number of iterations (m): ")
         else:
-            alpha = 0.01
-            tau = 1e-6
+            alpha = 0.08
+            tau = 1e-4
             max_iter = 1000
             print(
                 f"DEBUG DETECTED: alpha = {alpha}, tau = {tau}, max_iter = {max_iter}"
