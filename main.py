@@ -9,7 +9,9 @@ from ml import linear_regression, logistic_regression
 def main(_type):
     # Fetch data
     data = fetch_california_housing(as_frame=True)
-    X = data.data.to_numpy()  # Assigning all columns except "MedHouseVal" for Xgrab all columns except "MedHouseVal" for X
+    X = (
+        data.data.to_numpy()
+    )  # Assigning all columns except "MedHouseVal" for Xgrab all columns except "MedHouseVal" for X
     y = data.target.to_numpy()  # Assigning "MedHouseVal" as Target
 
     # Determine which algorithm the user wants
@@ -42,9 +44,6 @@ def main(_type):
         pass
     elif _type == 1:  # Logistic Regression
         print("Logistic Regression Selected\n")
-
-        # Encode y with any value above 2.0685 will be 1 else 0
-        y = np.where(y > 2.0685, 1, 0)
 
         # Check for debug mode
         gettrace = getattr(sys, "gettrace", None)

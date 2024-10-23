@@ -1,3 +1,4 @@
+from os import walk
 import numpy as np
 
 
@@ -268,8 +269,21 @@ class logistic_regression:
 
         print(f"\nTheta: {gd}")
 
-    def test(self):
-        raise NotImplementedError("test has not been implement.")
+    def predict(self, X: np.ndarray):
+        if not self.has_param:
+            raise ValueError(
+                "Parameter has not been learn, please run the train() function first."
+            )
+
+        # Append 1's to X
+        ones = np.ones((X.shape[0], 1))
+        X = np.append(X, ones, axis=1)
+
+        vec_p = self.predict_probablility(X, self.final_theta)
+
+        labels = (vec_p >= 0.5).astype(int)
+
+        return labels
 
     def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
         # TODO: Write docstring
