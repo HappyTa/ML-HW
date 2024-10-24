@@ -195,29 +195,6 @@ class linear_regression:
         else:
             raise TypeError("Param must be an int or a tuple of two elements.")
 
-    def get_hyper_param(self, param):
-        """Return a single or dict of hyperparameters bases on param.
-
-        keywords:
-        param -- determine what to return:
-              ---- A key of str/int/other hashable type => return value
-                   associated with the key
-              ---- Tuple (start, end) => Return the values for a range of keys
-        """
-        if isinstance(param, (int, str)):
-            return self.hyper_param.get(param, "key not found")
-        elif isinstance(param, tuple) and len(param) == 2:
-            start, end = param
-            keys = list(self.hyper_param.keys())
-            if start in keys and end in keys:
-                start_idx = keys.index(start)
-                end_ids = keys.index(end) + 1
-                return {k: self.hyper_param[k] for k in keys[start_idx:end_ids]}
-            else:
-                return "One or both keys not found"
-        else:
-            raise ValueError("Param must be an a key or a tuple of two keys.")
-
     # def get_theta(self, X: np.ndarray, y: np.ndarray, sigma2=0, b2=1, lamb=0, type=0):
 
 
