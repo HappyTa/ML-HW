@@ -53,7 +53,7 @@ This function allow the user to select what they want to run by using messages p
 ```
 python3 -O main.py [argument]
 
--O         Turn of debug mode (this will supress debug messages)
+-O         Turn off debug mode (this will supress debug messages)
 [arguemnt] Must be of int type
            0: Linear Regression
            1: Logistic Regression
@@ -67,7 +67,7 @@ This script is made to test the Linear Regression prediction function
 
 ```
 python3 -O test.py
--O         Turn of debug mode (this will supress debug messages)
+-O         Turn off debug mode (this will supress debug messages)
 ```
 
 This will return a graph, detailing the Root Mean Square Error result from the algorithm depending on the percentage of data used for training.
@@ -79,7 +79,7 @@ This script is made to test the accuracy of my Logistic Regression implementatio
 ```
 python3 -O feature_engineering [arguemnt]
 
--O         Turn of debug mode (this will supress debug messages)
+-O         Turn off debug mode (this will supress debug messages)
 [arguemnt] Must be of int type
            0: Graph for question 3A
            1: Graph for questiong 3B
