@@ -56,6 +56,8 @@ def test_linear_regression():
         y_train, y_test = y[train_indices], y[test_indices]
         #
         # MLE
+
+        # TODO: Change hyperparameres here
         mle_hp = {"type": 0, "sigma2": 0, "b2": 1, "lambda": 0}
 
         mle_lr = linear_regression(mle_hp)
@@ -65,6 +67,7 @@ def test_linear_regression():
         rmse_mle_list.append(rmse_mle)
 
         # MAP
+        # TODO: Change hyperparameres here
         map_hp = {"type": 1, "sigma2": 0.5, "b2": 1, "lambda": 0.1}
         map_lr = linear_regression(map_hp)
         map_lr.train(X_train, y_train)
@@ -107,9 +110,4 @@ def test_linear_regression():
 
 
 if __name__ == "__main__":
-    if sys.argv[1] == "0":  # Linear Regression
-        test_linear_regression()
-    elif sys.argv[1] == "1":
-        sys.exit(0)
-    else:
-        test_linear_regression()
+    test_linear_regression()

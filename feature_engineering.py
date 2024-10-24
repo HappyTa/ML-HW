@@ -1,8 +1,17 @@
+import sys
+
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from sklearn.datasets import fetch_california_housing
-from sklearn.metrics import ConfusionMatrixDisplay, confusion_matrix
+from sklearn.metrics import (
+    ConfusionMatrixDisplay,
+    confusion_matrix,
+    precision_score,
+    recall_score,
+    f1_score,
+    accuracy_score,
+)
 from sklearn.preprocessing import StandardScaler
 
 from ml import linear_regression, logistic_regression
@@ -53,6 +62,7 @@ def logistic_regression_prediction(
     scale = StandardScaler()
     X = scale.fit_transform(X)
     lor_hp = {"alpha": 0.08, "tau": 1e-4, "max_iter": 1000}
+    accuracies, precisions, recalls, f1_scores = [], [], [], []
     rtn_val = []
     for pct in training_percentages:
         test_size = 1 - pct
@@ -70,10 +80,16 @@ def logistic_regression_prediction(
         labels = lor.predict(X_test)
         rtn_val.append((labels, y_test))
 
-    return rtn_val
+        # Compute metrics
+        accuracies.append(accuracy_score(y_test, labels))
+        precisions.append(precision_score(y_test, labels))
+        recalls.append(recall_score(y_test, labels))
+        f1_scores.append(f1_score(y_test, labels))
+
+    return rtn_val, accuracies, precisions, recalls, f1_scores
 
 
-def feature_engineering():
+def feature_engineering(type):
     X, y, data = grab_data()
 
     # Training
@@ -99,26 +115,86 @@ def feature_engineering():
 
     # logistic_regression prediction
     y_true = data["willing_to_purchase"].to_numpy()
+    # TODO: Change hyperparameres here
     training_percentages = [0.1, 0.2, 0.4, 0.6, 0.8, 0.999]
-    pred_labels_list = logistic_regression_prediction(X, y_true, training_percentages)
+    confusion_matrix_var, accuracies, precisions, recalls, f1_scores = (
+        logistic_regression_prediction(X, y_true, training_percentages)
+    )
     print()
-    # Create a figure with 6 subplots (2 rows, 3 columns)
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 
-    # Loop through each set of predictions and plot the confusion matrix
-    for i, labels in enumerate(pred_labels_list):
-        cm = confusion_matrix(labels[0], labels[1])
-        disp = ConfusionMatrixDisplay(confusion_matrix=cm)
+    if type == 0:
+        # Create a figure with 6 subplots (2 rows, 3 columns)
+        fig, axes = plt.subplots(2, 3, figsize=(15, 10))
 
-        # Determine which subplot to use (row and column indices)
-        row, col = divmod(i, 3)
-        disp.plot(ax=axes[row, col], cmap=plt.cm.Blues)
-        axes[row, col].set_title(f"Used {training_percentages[i]}% for Training")
+        # Loop through each set of predictions and plot the confusion matrix
+        for i, labels in enumerate(confusion_matrix_var):
+            cm = confusion_matrix(labels[0], labels[1])
+            disp = ConfusionMatrixDisplay(confusion_matrix=cm)
 
-    # Adjust layout
-    plt.tight_layout()
-    plt.show()
+            # Determine which subplot to use (row and column indices)
+            row, col = divmod(i, 3)
+            disp.plot(ax=axes[row, col], cmap=plt.cm.Blues)
+            axes[row, col].set_title(f"Used {training_percentages[i]}% for Training")
+
+        # Adjust layout
+        plt.tight_layout()
+        plt.show()
+    else:
+        # Create subplots for each metric
+        fig, axs = plt.subplots(2, 2, figsize=(12, 10))
+
+        # Accuracy plot
+        axs[0, 0].plot(
+            training_percentages,
+            accuracies,
+            marker="o",
+            label="Accuracy",
+            color="blue",
+        )
+        axs[0, 0].set_title("Accuracy vs Training Size")
+        axs[0, 0].set_xlabel("Percentage of Training Data")
+        axs[0, 0].set_ylabel("Accuracy")
+
+        # Precision plot
+        axs[0, 1].plot(
+            training_percentages,
+            precisions,
+            marker="o",
+            label="Precision",
+            color="green",
+        )
+        axs[0, 1].set_title("Precision vs Training Size")
+        axs[0, 1].set_xlabel("Percentage of Training Data")
+        axs[0, 1].set_ylabel("Precision")
+
+        # Recall plot
+        axs[1, 0].plot(
+            training_percentages, recalls, marker="o", label="Recall", color="orange"
+        )
+        axs[1, 0].set_title("Recall vs Training Size")
+        axs[1, 0].set_xlabel("Percentage of Training Data")
+        axs[1, 0].set_ylabel("Recall")
+
+        # F1-score plot
+        axs[1, 1].plot(
+            training_percentages,
+            f1_scores,
+            marker="o",
+            label="F1-score",
+            color="red",
+        )
+        axs[1, 1].set_title("F1-score vs Training Size")
+        axs[1, 1].set_xlabel("Percentage of Training Data")
+        axs[1, 1].set_ylabel("F1-score")
+
+        # Adjust layout and show plots
+        plt.tight_layout()
+        plt.show()
+        pass
 
 
 if __name__ == "__main__":
-    feature_engineering()
+    type = 0
+    if sys.argv[1:]:
+        type = int(sys.argv[1])
+    feature_engineering(type)

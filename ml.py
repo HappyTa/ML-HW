@@ -227,6 +227,11 @@ class logistic_regression:
     final_theta = np.array([])
 
     def __init__(self, hyper_param: dict) -> None:
+        """initialize the logistic regression model with hyperparameters.
+
+        keywords:
+        hyper_param (dict) -- dictionary containing hyperparameters
+        """
         keys_needed = [
             "alpha",
             "tau",
@@ -314,19 +319,17 @@ class logistic_regression:
         return labels
 
     def gradient_descent(self, X: np.ndarray, y: np.ndarray, alpha, tau, max_iter):
-        """Perform gradient gradient_descent
+        """Calculate the gradient of the logistic regression loss function.
 
         Keywords:
-        X (np.ndarray) -- Input matrix, shape (n_samples, n_features).
-        y (np.ndarray) -- Target vector, shape (n_samples).
-        alpha (float)  -- Learning rate. Control the step size in the parameter
-                          space during gradient descent.
-        tau (float)    -- convergence threshold. Detemind when we stop descending.
-        max_iter (int) -- The maximum number of iterations for gradient descent.
+        X (np.ndarray) -- 2D Numpy array that contain the training data
+        y (np.ndarray) -- 1D Numpy array that contain the training labels
+        alpha (float)    -- Learning rate. Decrease to slow down convergence.
+        tau (float)    -- Tolerance for convergence.
+        mmax_iter (int)  -- Maximum number of iterations.
 
         Returns:
-        theta (np.ndarray) -- The optimized parameters after convergence or
-                              when we reach the maxium number of iterations
+        theta (np.ndarray) -- The optimized parameter (theta)
 
         Note:
 
@@ -360,15 +363,15 @@ class logistic_regression:
             return theta
 
     def compute_gradient(self, X: np.ndarray, y: np.ndarray, theta_prev):
-        """Calculate the gradient
+        """Calculate the gradient of the loss function with respect to theta
 
-        parameters:
+        keywords:
         X (np.ndarray)          -- Input matrix, shape (n_samples, n_features).
         y (np.ndarray)          -- Target vector, shape (n_samples).
         theta_prev (np.ndarray) -- The current version of the parameter
 
         Returns:
-        gradient                -- Return the Gradient
+        Gradient (np.ndarray) -- The gradient of the loss function with respect to theta
         """
         gradient = np.zeros(theta_prev.shape)
 
@@ -389,7 +392,15 @@ class logistic_regression:
         return gradient
 
     def predict_probablility(self, X: np.ndarray, theta_prev):
-        # TODO: Add docstring
+        """Calculate the probability of each sample in X
+
+        Keywords:
+        X (np.ndarray) -- Input matrix, shape (n_samples, n_features).
+        theta_prev (np.ndarray) -- The current version of the parameter
+
+        Return:
+        prob (np.ndarray) -- Probability of each sample in X
+        """
         # if not theta_prev:
         #     raise ValueError("Missing Theta.")
 

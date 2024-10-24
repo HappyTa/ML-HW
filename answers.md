@@ -6,7 +6,7 @@ This file is for all the parts that does not need code
 
 ### Question A
 
-Abstract superclasses in object-oriented programming facilitate modularity by defining common functionality that can be shared across multiple subclasses, allowing developers to easily swap or extend implementations without changing the rest of the system. This ensures that subclasses follow a consistent interface, promoting flexibility and reusability. In non-object-oriented languages, modular components require thorough documentation to describe how each function and data structure interacts, detailing inputs, outputs, and dependencies to help users understand how to integrate them effectively.
+Abstract superclasses in object-oriented programming facilitate modularity by defining common functionality that can be shared across multiple subclasses. This allows developers to easily swap or extend implementations without changing the rest of the system. It ensures that subclasses follow a consistent interface, promoting flexibility and reusability. In non-object-oriented languages, modular components require thorough documentation to describe how each function and data structure interacts, detailing inputs, outputs, and dependencies to help users understand how to integrate them effectively.
 
 ---
 
@@ -92,42 +92,25 @@ class q1BClass:
 If we do not provide functions that manipulate each of the variables (set
 methods), then how do you think these variables receive their assignments?
 
-    - In this case, the parameters is probably set at the start when the
-      "thing" is being created and would remain unchange until the "thing" is
-      not needed anymore
+- In this case, the parameters is probably set at the start when the "thing" is being created and would remain unchange until the "thing" is not needed anymore
 
 For a machine learning algorithm template, why should we prefer this
 approach over function that manipulate each variable?
 
-    - For a ML algorithm template, having the parameters set only at the start,
-      we insure consistency and resusaility
+- For a ML algorithm template, having the parameters set only at the start, we insure consistency and resusaility
 
 ---
 
 ### Question C
 
-Compare a hash map/dictionary to an array/matrix implementation for each of
-these variables—which is more appropriate for hyperparameters, which is more
-appropriate for parameters, and why?
+- **For parameters: Array/Matrix**
+  - Since we will most likely perform mathematical operations on these parameters (e.g., dot product, matrix multiplication), using an array/matrix would be more efficient and less of a hassle to set up.
+  - Furthermore, using libraries like NumPy or SciPy, arrays/matrices are more optimized, making operations on parameters faster and more efficient compared to using a dictionary.
 
-- For parameters: Array/Matrix
-  - Since we will most likely perform mathematical operation on these
-      parameters (e.g., dot product, matrix multiplication) using
-      array/matrix would be more efficient and a lot less of a hassle to
-      setup.
-  - Futhermore, using libraries like Numpy or SciPy, arrays/matrices will
-      be more optimized, making operation on parameters faster and more
-      efficient compared to a dictionary.
-
-- For Hyperparameters: Hash map/dictionary
-  - Since each algorithm have different hyperparameter and types, using a
-      dictionary help accomodate different hyperparameters without neeing
-      to maintain a fixed structure.
-  - Using a dictionary also allow for easy modification, making it
-      convient to adjust settings during experimentation.
-  - Futhermore, since hyperparameters are usually refered by name, using
-      a dictionary allow you yo associate each hyperparameter with a
-      meaningful key.
+- **For hyperparameters: Hash map/Dictionary**
+  - Since each algorithm has different hyperparameters and types, using a dictionary helps accommodate different hyperparameters without needing to maintain a fixed structure.
+  - A dictionary also allows for easy modification, making it convenient to adjust settings during experimentation.
+  - Furthermore, since hyperparameters are usually referred to by name, using a dictionary allows you to associate each hyperparameter with a meaningful key.
 
 ---
 
@@ -137,15 +120,15 @@ appropriate for parameters, and why?
 
 #### III
 
-![Alt text](Figure_1.png)
+![Alt text](./figures/Figure_1.png)
 
 #### IV
 
 Interpretation of $\theta_n$:
 
-- Positive $\theta_n$: This indicates that an increase in the n-th feature $x_n$ leads to an increase in the predicted real estate value. For example, if $x_n$ represents the number of bedrooms, a positive $\theta_n$ would suggest that houses with more bedrooms are predicted to have higher values.
+- Positive $\theta_n$: This indicates that an increase in the n-th feature $x_n$ leads to an increase in the predicted real estate value.
 
-- Negative $\theta_n$: A negative coefficient implies that an increase in the n-th feature results in a decrease in the predicted value. For instance, if $x_n$ is the distance from the city center, a negative $\theta_n$ would mean that properties farther from the city tend to have lower values.
+- Negative $\theta_n$: A negative coefficient implies that an increase in the n-th feature results in a decrease in the predicted value.
 
 - Zero $\theta_n$: This means that the n-th feature has no impact on the predicted value. It does not influence the real estate value in the model, suggesting that it might not be a significant predictor for this particular dataset.
 
@@ -165,3 +148,15 @@ With 1's accounting for 59.09% and 0's for 50.91%, this seems reasonable to me. 
 Since we are trying to predict the **ground truth**, using it will introduce data leakage during training that would not appear in real-world problem.
 
 #### III
+
+![Confusion matrix for each trained model](./figures/Figure_2.png)
+
+#### IV
+
+![Figure 3. 4 different metrics to measure the accuracy of the prediction](./figures/Figure_3.png)
+
+Looking at the graph, I seems that 80% provide the best sets of data for accuracy and precision. Having said that, when using 80% of the dataset, the recall rate and F1-score has a dramatic decrease. But then if we use 99% of the data then we lose all precision and accuracy but the recall rate and F1-score sky rocket. This could indicate a problem with either the dataset or my implementation of Logistic Regression.
+
+#### V
+
+The y-intercept defines the baseline shift of the logistic curve, setting the probability when all features are zero. Positive or negative coefficients for features then push the probability up or down from that baseline, affecting the position of the curve relative to the threshold (0.5) where the decision flips from 'not purchasing' to 'purchasing'
