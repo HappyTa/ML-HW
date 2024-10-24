@@ -8,17 +8,17 @@ This repository is made to hold all my answers for an assignment from my Machine
 
 | File Name | What they are |
 |-----------|---------------|
-| answers.md| Contain all non-code answers for the assignment|
-| main.py | This contain code related answers for question 1d and 2|
-| ml.py | Contain the implementation of Linear and logistic regressions |
-| test.py | This contain all the code used to generate the graph for question 3A |
-| feature_engineering.py | This contain all the code used tot generate the graphs for question 3B |
+| [answers.md](./answers.md)| Contain all non-code answers for the assignment|
+| [main.py](./main.py) | This contain code related answers for question 1d and 2|
+| [ml.py](./ml.py) | Contain the implementation of Linear and logistic regressions |
+| [test.py](./test.py) | This contain all the code used to generate the graph for question 3A |
+| [feature_engineering.py](./feature_engineering.py) | This contain all the code used tot generate the graphs for question 3B |
 
 ### How?
 
 This section will talk about what you need to run the scripts and how to run them.
 
-#### Requirements
+#### Dependencies
 
 To run this you will need:
 
