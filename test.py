@@ -88,7 +88,7 @@ def test_linear_regression():
 
     # Plot RMSE Comparison
     plt.figure(figsize=(10, 6))
-    plt.plot(training_percentages, rmse_mle_list, label="MLE", marker="o", color="blue")
+    plt.plot(training_percentages, rmse_mle_list, label="MLE", marker="D", color="blue")
     plt.plot(
         training_percentages, rmse_map_list, label="MAP", marker="o", color="green"
     )
@@ -96,7 +96,7 @@ def test_linear_regression():
         training_percentages,
         rmse_reg_list,
         label="Regularization",
-        marker="o",
+        marker="x",
         color="red",
     )
     plt.xlabel("Percentage of dataset used for training (%)")

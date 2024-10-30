@@ -2,7 +2,7 @@
 
 ## How to use this repository
 
-### The What
+### What?
 
 This repository is made to hold all my answers for an assignment from my Machine Learning class, the questions is in the file: ```princML_hw02-1.pd```
 
@@ -24,11 +24,15 @@ To run this you will need:
 
 1. [scikit learn](https://pypi.org/project/scikit-learn/)
 
+Package for machine learning tools.
+
 ```
 pip install scikit-learn
 ```
 
 2. [numpy](https://pypi.org/project/numpy/)
+
+Package for easy matrix creation and interaction.
 
 ```
 pip install numpy
@@ -36,19 +40,23 @@ pip install numpy
 
 3. [Matplotlib](https://pypi.org/project/matplotlib/)
 
+Package for graphing.
+
 ```
 pip install matplotlib
 ```
 
 4. [SciPy](https://pypi.org/project/scipy/)
 
+Additional machine learning tools
+
 ```
 pip install scipy
 ```
 
-#### Runnning main.py
+#### Running main.py
 
-This function allow the user to select what they want to run by using messages print onto the commandline. It require 1 arguemnt to be passed in which represent type of algorithm they would like to run:
+This function allow the user to select what they want to run by using messages print onto the command line. It require 1 argument to be passed in which represent type of algorithm they would like to run:
 
 ```
 python3 -O main.py [argument]
@@ -72,7 +80,7 @@ python3 -O test.py
 
 This will return a graph, detailing the Root Mean Square Error result from the algorithm depending on the percentage of data used for training.
 
-#### Runnning feature_engineering.py
+#### Running feature_engineering.py
 
 This script is made to test the accuracy of my Logistic Regression implementation. It require an argument to be passed in.
 
@@ -85,7 +93,7 @@ python3 -O feature_engineering [arguemnt]
            1: Graph for questiong 3B
 ```
 
- This return 2 differnt sets of graphs based on what arguemnt was passed in. If 0 was passed in, it will spit out the confusion matrix for each subsets of the training data. If 1 was passed in it will return the accuracy, precision, recall rate, and F1-score for each of the data subset.H
+ This return 2 different sets of graphs based on what argument was passed in. If 0 was passed in, it will spit out the confusion matrix for each subsets of the training data. If 1 was passed in it will return the accuracy, precision, recall rate, and F1-score for each of the data subset.H
 
 #### Other notes
 
