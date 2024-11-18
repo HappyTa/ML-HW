@@ -34,7 +34,6 @@ def main(_type):
                 b2 = input("Please provide the value of b^2 = ")
         if flavor == 2: # Regularized
 
-
         hyper_param = {"type": flavor, "sigma2": sigma2, "b2": b2, "lambda": _lambda}
 
         lr = linear_regression(hyper_param)
