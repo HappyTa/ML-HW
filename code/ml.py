@@ -390,3 +390,47 @@ class logistic_regression:
         # prob = 1 / (1 + np.exp(-z))
         prob = sigmoid(z)
         return prob
+
+
+class node:
+    def __init__(
+        self,
+        feature=None,
+        threshold=None,
+        left=None,
+        right=None,
+        is_leaf=False,
+        value=None,
+        node_type=0,
+    ):
+        """Initialize a decision tree node.
+
+        keywords:
+        feature (int, optional) -- The feature to split on. Defaults to None.
+        threshold (float, optional) -- The threshold value to split on. Defaults to None.
+        left (node, optional) -- The left child node. Defaults to None.
+        right (node, optional) -- The right child node. Defaults to None.
+        is_leaf (bool, optional) -- If the node is a leaf node. Defaults to False.
+        value (any, optional) -- The value of the leaf node. Defaults to None.
+        node_type (int, optional) -- The type of node (0 for internal, 1 for leaf). Defaults to 0.
+        """
+        self.feature = feature
+        self.threshold = threshold
+        self.left = left
+        self.right = right
+        self.value = value
+        self.is_leaf = is_leaf
+        self.node_type = node_type
+
+
+class decision_tree:
+    def __init__(self, max_depth=None, min_samples_split=2, min_samples_leaf=1):
+        self.max_depth = max_depth
+        self.min_samples_split = min_samples_split
+        self.min_samples_leaf = min_samples_leaf
+
+    def train(self):
+        pass
+
+    def test(self):
+        pass

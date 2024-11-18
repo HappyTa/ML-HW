@@ -4,15 +4,18 @@
 
 ### What?
 
-This repository is made to hold all my answers for an assignment from my Machine Learning class, the questions is in the file: ```princML_hw02-1.pd```
+ This repository is made to hold all my answers for an assignment from my Machine Learning class, the questions is in the file:
+
+- [princML_hw02-1.pdf](./questions/princML_hw02-1.pdf)
+- [princML_hw03-1.pdf](./questions/princML_hw03-1.pdf)
 
 | File Name | What they are |
 |-----------|---------------|
 | [answers.md](./answers.md)| Contain all non-code answers for the assignment|
-| [main.py](./main.py) | This contain code related answers for question 1d and 2|
-| [ml.py](./ml.py) | Contain the implementation of Linear and logistic regressions |
-| [test.py](./test.py) | This contain all the code used to generate the graph for question 3A |
-| [feature_engineering.py](./feature_engineering.py) | This contain all the code used tot generate the graphs for question 3B |
+| [main.py](./code/main.py) | This contain code related answers for question 1d and 2|
+| [ml.py](./code/ml.py) | Contain the implementation of Linear and logistic regressions |
+| [test.py](./code/test.py) | This contain all the code used to generate the graph for question 3A |
+| [feature_engineering.py](./code/feature_engineering.py) | This contain all the code used tot generate the graphs for question 3B |
 
 ### How?
 
@@ -59,7 +62,7 @@ pip install scipy
 This function allow the user to select what they want to run by using messages print onto the command line. It require 1 argument to be passed in which represent type of algorithm they would like to run:
 
 ```
-python3 -O main.py [argument]
+python3 -O code/main.py [argument]
 
 -O         Turn off debug mode (this will supress debug messages)
 [arguemnt] Must be of int type
@@ -74,7 +77,7 @@ The main purpose of this script is to demonstrate how the algorithm can be use.
 This script is made to test the Linear Regression prediction function
 
 ```
-python3 -O test.py
+python3 -O code/test.py
 -O         Turn off debug mode (this will supress debug messages)
 ```
 
@@ -85,7 +88,7 @@ This will return a graph, detailing the Root Mean Square Error result from the a
 This script is made to test the accuracy of my Logistic Regression implementation. It require an argument to be passed in.
 
 ```
-python3 -O feature_engineering [arguemnt]
+python3 -O code/feature_engineering [arguemnt]
 
 -O         Turn off debug mode (this will supress debug messages)
 [arguemnt] Must be of int type
