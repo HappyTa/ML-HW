@@ -1,5 +1,6 @@
 from scipy.special import expit as sigmoid
 import numpy as np
+import math
 
 
 class linear_regression:
@@ -85,7 +86,6 @@ class linear_regression:
 
         By default, this method does not care about sigma2, b2, or lambda, this
         is because it assumed the user want to do MLE by default. Only when _type
-        is 1 does it perform checks for sigma2, b2, or lambda.
 
         Return the optimal theta value.
 
@@ -393,44 +393,118 @@ class logistic_regression:
 
 
 class node:
-    def __init__(
-        self,
-        feature=None,
-        threshold=None,
-        left=None,
-        right=None,
-        is_leaf=False,
-        value=None,
-        node_type=0,
-    ):
-        """Initialize a decision tree node.
+    def __init__(self, node_type=0, value=None):
+        """Initialize a node object
 
-        keywords:
-        feature (int, optional) -- The feature to split on. Defaults to None.
-        threshold (float, optional) -- The threshold value to split on. Defaults to None.
-        left (node, optional) -- The left child node. Defaults to None.
-        right (node, optional) -- The right child node. Defaults to None.
-        is_leaf (bool, optional) -- If the node is a leaf node. Defaults to False.
-        value (any, optional) -- The value of the leaf node. Defaults to None.
-        node_type (int, optional) -- The type of node (0 for internal, 1 for leaf). Defaults to 0.
+        Keywords:
+            node_type (int) -- determine the node type (0 = query node, 1 = decision node)
+            value -- Feature value for query node or label value for decision node
         """
-        self.feature = feature
-        self.threshold = threshold
-        self.left = left
-        self.right = right
-        self.value = value
-        self.is_leaf = is_leaf
+
         self.node_type = node_type
+        self.value = value
+        self.children = {}  # Initialize the empty children dict
+
+    def __repr__(self) -> str:
+        if self.is_leaf():
+            return f"DecisionNode(value = {self.value})"
+        else:
+            return (
+                f"QueryNode(value={self.value}, children={list(self.children.keys())})"
+            )
+
+    def add_child(self, position, child):
+        """Add a child node to the current node"""
+        if position not in ["left", "right"]:
+            raise ValueError("Position must be left or right")
+        if not child:
+            raise ValueError("Child cannot be empty")
+
+        self.children[position] = child
+
+    def is_leaf(self):
+        return self.node_type == 1
 
 
 class decision_tree:
-    def __init__(self, max_depth=None, min_samples_split=2, min_samples_leaf=1):
+    def __init__(
+        self, max_depth=None, min_samples_split=2, min_samples_leaf=1, error_func="gini"
+    ):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
+        self.error_func = error_func
 
-    def train(self):
+    def train(self, X: np.ndarray, y: np.ndarray):
+        if not (self.error_func and self.error_func.lower() in ["gini", "entropy"]):
+            raise ValueError(
+                "Error function was not selected please pass in gini or entropy when creating a decision_tree object"
+            )
+        else:
+            _train_recursive(X, y, X)
         pass
 
     def test(self):
         pass
+
+    def entropy(self, vec_y) -> float:
+        total_count = len(vec_y)
+        label_count = {}
+
+        for label in vec_y:
+            if label in label_count.values():
+                label_count[label] += 1
+            else:
+                label_count[label] = 1
+
+        h = 0.0
+
+        for label, count in label_count:
+            p = count / total_count
+            h += -p * math.log2(p)
+
+        return h
+
+    def gini(self, vec_y) -> float:
+        total_count = len(vec_y)
+        label_count = {}
+
+        for label in vec_y:
+            if label in label_count.values():
+                label_count[label] += 1
+            else:
+                label_count[label] = 1
+
+        g = 0.0
+
+        for label, count in label_count:
+            p = count / total_count
+            g += 1 - (p * p)
+
+        return g
+
+    def _train_recursive(self, X: np.ndarray, y: np.ndarray, queried_feat: np.ndarray):
+        if X[0].size != y.size:
+            raise ValueError("X and y have different lenght")
+        if X.size == queried_feat.size:
+            label_count = {}
+
+            for label in y:
+                if label in label_count.values():
+                    label_count[label] += 1
+                else:
+                    label_count[label] = 1
+                pass
+
+            majority_label = max(label_count, key=label_count.get)
+
+            decision_node = self.node(node_type=1, value=majority_label)
+
+        if not self.error_func:
+            raise AttributeError("Missing erro function for this method")
+        elif self.error_func == "gini":
+            error = self.gini(y)
+        elif self.error_func == "entropy":
+            error = self.entropy(y)
+
+    # _train_recursive()

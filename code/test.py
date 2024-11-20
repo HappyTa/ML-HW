@@ -1,10 +1,10 @@
 import sys
-import numpy as np
-from sklearn.datasets import fetch_california_housing
-from sklearn.model_selection import train_test_split
 
 import matplotlib.pyplot as plt
-from ml import linear_regression, logistic_regression
+import numpy as np
+from sklearn.datasets import fetch_california_housing
+
+from ml import decision_tree, linear_regression, node
 
 
 def grab_data() -> tuple[np.ndarray, np.ndarray]:
@@ -109,5 +109,24 @@ def test_linear_regression():
     plt.show()
 
 
+def test_nodes():
+    # query = node(node_type=0, value=0)
+    # queryr = node(node_type=0, value=1)
+    # queryl = node(node_type=0, value=-1)
+    # decision = node(node_type=1, value=11)
+    # query.add_child("left", queryl)
+    # query.add_child("right", queryr)
+    # queryr.add_child("left", decision)
+    #
+    # print(query)
+    dt = decision_tree()
+
+    X = np.random.rand(9, 3)
+    y = np.array([1, 1, 4, 4, 6, 4, 7, 8, 9])
+    dt._train_recursive(X, y, X)
+    sys.exit(0)
+
+
 if __name__ == "__main__":
-    test_linear_regression()
+    # test_linear_regression()
+    test_nodes()
