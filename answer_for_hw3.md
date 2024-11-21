@@ -22,3 +22,17 @@
 ### Part B
 
 
+**Train function**
+ii: How does changing the control flow only when the choice of a hyper-parameter reduce the amount of code we write if the rest of the control flow is identical regardless of hyper-parameter choice?
+
+- By changing the control flow based on the hyper-parameter help reduce code duplication and from that reduce the amount of code we write.
+
+iii: How does a recursive function build a tree when it only return a pointer to one decision tree node?
+
+- The node that is return is the root of the tree and as the function recursively run, it will add children node to this root and slowly build out a tree.
+
+**Predict Function**
+
+iii: If we had access to a GPU could we perform each prediction in parallel; why or why not?
+
+- We can definately perform the prediction in parallel, this is because each prediction is independent from each other.
