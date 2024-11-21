@@ -1,4 +1,5 @@
 from scipy.special import expit as sigmoid
+from utils import node
 import numpy as np
 import math
 
@@ -392,40 +393,6 @@ class logistic_regression:
         return prob
 
 
-class node:
-    def __init__(self, node_type=0, value=None):
-        """Initialize a node object
-
-        Keywords:
-            node_type (int) -- determine the node type (0 = query node, 1 = decision node)
-            value -- Feature value for query node or label value for decision node
-        """
-
-        self.node_type = node_type
-        self.value = value
-        self.children = {}  # Initialize the empty children dict
-
-    def __repr__(self) -> str:
-        if self.is_leaf():
-            return f"DecisionNode(value = {self.value})"
-        else:
-            return (
-                f"QueryNode(value={self.value}, children={list(self.children.keys())})"
-            )
-
-    def add_child(self, position, child):
-        """Add a child node to the current node"""
-        if position not in ["left", "right"]:
-            raise ValueError("Position must be left or right")
-        if not child:
-            raise ValueError("Child cannot be empty")
-
-        self.children[position] = child
-
-    def is_leaf(self):
-        return self.node_type == 1
-
-
 class decision_tree:
     def __init__(
         self, max_depth=None, min_samples_split=2, min_samples_leaf=1, error_func="gini"
@@ -433,10 +400,10 @@ class decision_tree:
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
-        self.error_func = error_func
+        self.error_type = error_func
 
     def train(self, X: np.ndarray, y: np.ndarray):
-        if not (self.error_func and self.error_func.lower() in ["gini", "entropy"]):
+        if not (self.error_type and self.error_type.lower() in ["gini", "entropy"]):
             raise ValueError(
                 "Error function was not selected please pass in gini or entropy when creating a decision_tree object"
             )
@@ -477,16 +444,35 @@ class decision_tree:
 
         g = 0.0
 
-        for label, count in label_count:
-            p = count / total_count
-            g += 1 - (p * p)
-
         return g
+
+    def compute_error(self, y) -> float:
+        total_count = len(y)
+        label_count = {}
+
+        for label in y:
+            if label in label_count.values():
+                label_count[label] += 1
+            else:
+                label_count[label] = 1
+
+        rtn_val = 0.0
+        error_type = self.error_type
+        if error_type == "gini":
+            for label, count in label_count:
+                p = count / total_count
+                rtn_val += 1 - (p * p)
+        elif error_type == "entropy":
+            for label, count in label_count:
+                p = count / total_count
+                rtn_val += -p * math.log2(p)
+        else:
+            return float("inf")
 
     def _train_recursive(self, X: np.ndarray, y: np.ndarray, queried_feat: np.ndarray):
         if X[0].size != y.size:
             raise ValueError("X and y have different lenght")
-        if X.size == queried_feat.size:
+        if X.size == queried_feat.size:  # basecase
             label_count = {}
 
             for label in y:
@@ -498,14 +484,48 @@ class decision_tree:
 
             majority_label = max(label_count, key=label_count.get)  # type: ignore
 
-            decision_node = self.node(node_type=1, value=majority_label)
+            return node(node_type=1, value=majority_label)
 
-        error = 0.0
-        if not self.error_func:
-            raise AttributeError("Missing erro function for this method")
-        elif self.error_func == "gini":
-            error = self.gini(y)
-        elif self.error_func == "entropy":
-            error = self.entropy(y)
+        # baseline error
+        baseline_error = self.compute_error(y)
 
-    # _train_recursive()
+        # Init dicts
+        feature_splits = {}
+        error_changes = {}
+
+        # Iterate over features to calculate splits
+        for feature in range(X[1]):
+            if feature in queried_feat:
+                continue  # Skip already-queried features
+
+            feature_splits[feature] = {}
+            for row_idx, value in enumerate(X[:, feature]):
+                feature_splits[feature].setdefault(value, []).append(row_idx)
+
+            # Calculate error change for each feature
+            total_error_change = 0
+            for value, row_indices in feature_splits[feature].items():
+                split_labels = [y[i] for i in row_indices]
+                split_error = self.compute_error(split_labels)
+                total_error_change += (
+                    (baseline_error - split_error) * len(split_labels) / len(y)
+                )
+
+            error_changes[feature] = total_error_change
+
+        # Find best error:
+        best_feat = max(error_changes, key=error_changes.get)  # type: ignore
+
+        current_node = node(node_type=0, value=best_feat)
+
+        # Splititing time
+        for value, row_idx in feature_splits[best_feat].items():
+            split_X = X[row_idx, :]
+            split_y = np.array([y[i] for i in row_idx])
+
+            child_node = self._train_recursive(
+                split_X, split_y, queried_feat + [best_feat]
+            )
+            current_node.children[value] = child_node
+
+        return current_node

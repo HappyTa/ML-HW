@@ -4,7 +4,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.datasets import fetch_california_housing
 
-from ml import decision_tree, linear_regression, node
+from ml import decision_tree, linear_regression
 
 
 def grab_data() -> tuple[np.ndarray, np.ndarray]:
