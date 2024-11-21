@@ -121,9 +121,9 @@ def test_nodes():
     # print(query)
     dt = decision_tree()
 
-    X = np.random.rand(9, 3)
-    y = np.array([1, 1, 4, 4, 6, 4, 7, 8, 9])
-    dt._train_recursive(X, y, X)
+    X_test = np.array([[0, 1], [1, 0], [0, 0], [1, 1]])
+    y_test = np.array([0, 1, 0, 1])
+    temp = dt._train_recursive(X_test, y_test, np.zeros(shape=(1, 4)))
     sys.exit(0)
 
 

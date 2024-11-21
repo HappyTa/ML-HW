@@ -470,8 +470,8 @@ class decision_tree:
             return float("inf")
 
     def _train_recursive(self, X: np.ndarray, y: np.ndarray, queried_feat: np.ndarray):
-        if X[0].size != y.size:
-            raise ValueError("X and y have different lenght")
+        # if X[0].size != y.size:
+        #     raise ValueError("X and y have different lenght")
         if X.size == queried_feat.size:  # basecase
             label_count = {}
 
