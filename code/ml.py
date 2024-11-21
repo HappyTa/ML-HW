@@ -496,10 +496,11 @@ class decision_tree:
                     label_count[label] = 1
                 pass
 
-            majority_label = max(label_count, key=label_count.get)
+            majority_label = max(label_count, key=label_count.get)  # type: ignore
 
             decision_node = self.node(node_type=1, value=majority_label)
 
+        error = 0.0
         if not self.error_func:
             raise AttributeError("Missing erro function for this method")
         elif self.error_func == "gini":
