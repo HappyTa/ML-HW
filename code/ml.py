@@ -400,6 +400,10 @@ class decision_tree:
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
+        if not (self.error_type and self.error_type.lower() in ["gini", "entropy"]):
+            raise ValueError(
+                "Incorrect or missing error function selected. please use 'gini' or 'entropy'"
+            )
         self.error_type = error_func
 
     def train(self, X: np.ndarray, y: np.ndarray):
@@ -407,80 +411,51 @@ class decision_tree:
             raise ValueError(
                 "Error function was not selected please pass in gini or entropy when creating a decision_tree object"
             )
-        else:
-            _train_recursive(X, y, X)
-        pass
+
+        self.dt = self._train_recursive(X, y)
 
     def test(self):
         pass
-
-    def entropy(self, vec_y) -> float:
-        total_count = len(vec_y)
-        label_count = {}
-
-        for label in vec_y:
-            if label in label_count.values():
-                label_count[label] += 1
-            else:
-                label_count[label] = 1
-
-        h = 0.0
-
-        for label, count in label_count:
-            p = count / total_count
-            h += -p * math.log2(p)
-
-        return h
-
-    def gini(self, vec_y) -> float:
-        total_count = len(vec_y)
-        label_count = {}
-
-        for label in vec_y:
-            if label in label_count.values():
-                label_count[label] += 1
-            else:
-                label_count[label] = 1
-
-        g = 0.0
-
-        return g
 
     def compute_error(self, y) -> float:
         total_count = len(y)
         label_count = {}
 
         for label in y:
-            if label in label_count.values():
+            if label in label_count:
                 label_count[label] += 1
             else:
                 label_count[label] = 1
 
         rtn_val = 0.0
         error_type = self.error_type
-        if error_type == "gini":
-            for label, count in label_count:
+        for label, count in label_count.items():
+            if error_type == "gini":
                 p = count / total_count
                 rtn_val += 1 - (p * p)
-        elif error_type == "entropy":
-            for label, count in label_count:
+            elif error_type == "entropy":
                 p = count / total_count
                 rtn_val += -p * math.log2(p)
-        else:
-            return float("inf")
+            else:
+                raise AttributeError(
+                    "Incorrect error type selected. Please only use 'gini' or 'entropy'"
+                )
 
-    def _train_recursive(self, X: np.ndarray, y: np.ndarray, queried_feat: np.ndarray):
+        return rtn_val
+
+    def _train_recursive(
+        self, X: np.ndarray, y: np.ndarray, queried_feat=np.array([], dtype=int)
+    ):
         # if X[0].size != y.size:
         #     raise ValueError("X and y have different lenght")
         if X.size == queried_feat.size:  # basecase
             label_count = {}
 
             for label in y:
-                if label in label_count.values():
+                if label in label_count.items():
                     label_count[label] += 1
                 else:
                     label_count[label] = 1
-                pass
 
             majority_label = max(label_count, key=label_count.get)  # type: ignore
 
@@ -494,7 +469,7 @@ class decision_tree:
         error_changes = {}
 
         # Iterate over features to calculate splits
-        for feature in range(X[1]):
+        for feature in range(X.shape[1]):
             if feature in queried_feat:
                 continue  # Skip already-queried features
 
@@ -503,10 +478,14 @@ class decision_tree:
                 feature_splits[feature].setdefault(value, []).append(row_idx)
 
             # Calculate error change for each feature
-            total_error_change = 0
+            total_error_change = 0.0
             for value, row_indices in feature_splits[feature].items():
                 split_labels = [y[i] for i in row_indices]
+                if not split_labels:
+                    continue
+
                 split_error = self.compute_error(split_labels)
+
                 total_error_change += (
                     (baseline_error - split_error) * len(split_labels) / len(y)
                 )
@@ -524,8 +503,8 @@ class decision_tree:
             split_y = np.array([y[i] for i in row_idx])
 
             child_node = self._train_recursive(
-                split_X, split_y, queried_feat + [best_feat]
+                split_X, split_y, np.append(queried_feat, [best_feat])
             )
-            current_node.children[value] = child_node
+            current_node.add_child(value.item(), child_node)
 
         return current_node

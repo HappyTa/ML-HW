@@ -18,3 +18,7 @@
 
 - The key in this hash map/dictionary will be the position, either left or right, the value will be a node object, representing the children nodes.
 - Using a hash map/dictionary is great for runtime because any operation using this data type can result in O(1), greatly improve performance compare to other data structure.
+
+### Part B
+
+

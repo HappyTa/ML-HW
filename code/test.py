@@ -123,7 +123,8 @@ def test_nodes():
 
     X_test = np.array([[0, 1], [1, 0], [0, 0], [1, 1]])
     y_test = np.array([0, 1, 0, 1])
-    temp = dt._train_recursive(X_test, y_test, np.zeros(shape=(1, 4)))
+    temp = dt._train_recursive(X_test, y_test)
+    print(temp)
     sys.exit(0)
 
 
