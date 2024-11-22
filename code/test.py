@@ -1,3 +1,4 @@
+import enum
 import sys
 
 import matplotlib.pyplot as plt
@@ -120,12 +121,22 @@ def test_nodes():
     #
     # print(query)
     dt = decision_tree()
+    # X = np.random.randint(1, 10, size=(100, 4))
+    # y = np.random.randint(0, 2, size=(100, 1))
+    X, y = grab_data()
 
-    X_test = np.array([[0, 1], [1, 0], [0, 0], [1, 1]])
-    y_test = np.array([0, 1, 0, 1])
-    temp = dt._train_recursive(X_test, y_test)
-    print(temp)
-    sys.exit(0)
+    test_size = 1 - 0.8
+    indices = np.arange(X.shape[0])
+    # Split based on the test size
+    split_idx = int(X.shape[0] * (1 - test_size))
+    train_indices, test_indices = indices[:split_idx], indices[split_idx:]
+
+    # Split the features and labels
+    X_train, X_test = X[train_indices], X[test_indices]
+    y_train, y_test = y[train_indices], y[test_indices]
+
+    dt.train(X_train, y_train)
+    dt.predict(X_test)
 
 
 if __name__ == "__main__":

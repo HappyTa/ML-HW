@@ -1,3 +1,4 @@
+from pandas.core.interchange.dataframe_protocol import enum
 from scipy.special import expit as sigmoid
 from utils import node
 import numpy as np
@@ -394,17 +395,22 @@ class logistic_regression:
 
 
 class decision_tree:
+    PARAMETER_SET = False
+
     def __init__(
         self, max_depth=None, min_samples_split=2, min_samples_leaf=1, error_func="gini"
     ):
         self.max_depth = max_depth
         self.min_samples_split = min_samples_split
         self.min_samples_leaf = min_samples_leaf
+        self.error_type = error_func
         if not (self.error_type and self.error_type.lower() in ["gini", "entropy"]):
             raise ValueError(
                 "Incorrect or missing error function selected. please use 'gini' or 'entropy'"
             )
-        self.error_type = error_func
+
+    def get_dt(self):
+        return self.__dt
 
     def train(self, X: np.ndarray, y: np.ndarray):
         if not (self.error_type and self.error_type.lower() in ["gini", "entropy"]):
@@ -412,16 +418,33 @@ class decision_tree:
                 "Error function was not selected please pass in gini or entropy when creating a decision_tree object"
             )
 
-        self.dt = self._train_recursive(X, y)
+        self.__dt = self._train_recursive(X, y)
+        self.PARAMETER_SET = True
 
-    def test(self):
-        pass
+    def predict(self, X: np.ndarray):
+        if not self.PARAMETER_SET:
+            raise ValueError(
+                "This tree has not been trainned yet. Please run the train() and try again."
+            )
+
+        vec_z = []
+
+        for X_row in X:
+            current_node = self.__dt
+            while not current_node.is_decision_node():
+                feature_val = X_row[current_node.value].item()
+                current_node = current_node.get_child(feature_val)
+
+            vec_z.append(current_node.value)
+
+        return vec_z
 
     def compute_error(self, y) -> float:
         total_count = len(y)
         label_count = {}
 
         for label in y:
+            label = label.item()
             if label in label_count:
                 label_count[label] += 1
             else:
@@ -452,6 +475,7 @@ class decision_tree:
             label_count = {}
 
             for label in y:
+                label = label.item()
                 if label in label_count.items():
                     label_count[label] += 1
                 else:
