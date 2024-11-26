@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.datasets import fetch_california_housing
 
-from ml import decision_tree, linear_regression
+from ml import decision_tree, linear_regression, kmean
 
 
 def grab_data() -> tuple[np.ndarray, np.ndarray]:
@@ -139,6 +139,25 @@ def test_nodes():
     dt.predict(X_test)
 
 
+def test_kmean():
+    X, y = grab_data()
+
+    test_size = 1 - 0.8
+    indices = np.arange(X.shape[0])
+    # Split based on the test size
+    split_idx = int(X.shape[0] * (1 - test_size))
+    train_indices, test_indices = indices[:split_idx], indices[split_idx:]
+
+    # Split the features and labels
+    X_train, X_test = X[train_indices], X[test_indices]
+    y_train, y_test = y[train_indices], y[test_indices]
+
+    hyper_param = {"K": 5, "threshold": 1e-4, "max_iter": 300}
+    km = kmean(hyper_param)
+    km.train(X_train, y_train)
+    sys.exit(0)
+
+
 if __name__ == "__main__":
     # test_linear_regression()
-    test_nodes()
+    test_kmean()

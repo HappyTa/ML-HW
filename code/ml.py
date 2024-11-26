@@ -5,6 +5,17 @@ import numpy as np
 import math
 
 
+class ml_class:
+    def __init__(self, hyper_param: dict) -> None:
+        self.hyper_param = hyper_param
+
+    def train(self, X: np.ndarray, y: np.ndarray) -> None:  # pyright: ignore[y]
+        pass
+
+    def predict(self, y: np.ndarray):  # pyright: ignore[y]
+        pass
+
+
 class linear_regression:
     vec_theta = np.array([])
     has_param = False
@@ -532,3 +543,57 @@ class decision_tree:
             current_node.add_child(value.item(), child_node)
 
         return current_node
+
+
+class kmean(ml_class):
+    def __init__(self, hyper_param: dict):
+        hyper_param = dict((k.lower(), v) for k, v in hyper_param.items())
+        if "k" not in hyper_param.keys():
+            raise ValueError("Missing K in hyperparameter.")
+        if "threshold" not in hyper_param.keys():
+            raise ValueError("Missing threshold value in hyperparameter.")
+        if "max_iter" not in hyper_param.keys():
+            raise ValueError("Missing max_iter in hyperparameter.")
+
+        for key, value in hyper_param.items():
+            if value < 0:
+                raise ValueError(f"{key} cannot be negative.")
+            if key == "k":
+                if not isinstance(value, int):
+                    raise TypeError(f"{key} must be of integer type.")
+
+        super().__init__(hyper_param)
+
+    def __initialize(self, X: np.ndarray):
+        # create learned parameter holder
+        k = self.hyper_param["k"]
+        learned_param = np.zeros((k, X.shape[0]))
+
+        # adding cluster tracker to X
+        X = np.c_[X, np.zeros((X.shape[0], 1))]
+
+        k_entries = np.zeros(k)
+
+        # Create initial state
+        for curr_row in X:
+            assigned_cluster = np.random.randint(0, k)
+            curr_row[-1] = assigned_cluster
+            k_entries[assigned_cluster] += 1
+
+        return learned_param, k_entries
+
+    def train(self, X: np.ndarray, y: np.ndarray) -> None:
+        # initialize
+        learned_param, k_entries = self.__initialize(X)
+
+        converged = False
+
+        # finding centroids till convergence
+        # the comment above belong in a sci-fi book or movie
+        while not converged:
+            
+
+        print("test")
+
+    def predict(self, y: np.ndarray):
+        return super().predict(y)
