@@ -14,8 +14,8 @@ class ml_class:
     def train(self, X: np.ndarray, y: np.ndarray) -> None:  # pyright: ignore[y]
         pass
 
-    def predict(self, X: np.ndarray):  # pyright: ignore[y]
-        pass
+    def predict(self, X: np.ndarray) -> np.ndarray:  # pyright: ignore[y]
+        return np.zeros_like(X)
 
 
 class node:

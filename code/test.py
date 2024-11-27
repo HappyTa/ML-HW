@@ -152,9 +152,11 @@ def test_kmean():
     X_train, X_test = X[train_indices], X[test_indices]
     y_train, y_test = y[train_indices], y[test_indices]
 
-    hyper_param = {"K": 5, "threshold": 1e-4, "max_iter": 300}
+    hyper_param = {"K": 5, "threshold": 1e-4, "max_iter": 400}
     km = kmean(hyper_param)
     km.train(X_train, y_train)
+    pred_val = km.predict(X_test)
+    km.visualize_clusters(X_test, pred_val)
     sys.exit(0)
 
 

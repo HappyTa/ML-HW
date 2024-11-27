@@ -4,6 +4,7 @@ from scipy.special import expit as sigmoid
 from utils import node, ml_class, NotTrainedError
 import numpy as np
 import math
+import matplotlib.pyplot as plt
 
 
 class linear_regression:
@@ -554,28 +555,12 @@ class kmean(ml_class):
 
         super().__init__(hyper_param)
 
-    def _init_train(self, X: np.ndarray):
-        # create learned parameter holder
-        k = self.hyper_param["k"]
-        learned_param = np.zeros((k, X.shape[1]))
-
-        # adding cluster tracker to X
-        X = np.c_[X, np.zeros((X.shape[0], 1))]
-
-        k_entries = np.zeros(k)
-
-        # Create initial state
-        for curr_row in X:
-            assigned_cluster = np.random.randint(0, k)
-            curr_row[-1] = assigned_cluster
-            k_entries[assigned_cluster] += 1
-
-        return learned_param, k_entries, X
-
     def train(self, X: np.ndarray, y: np.ndarray) -> None:
         # initialize
-        learned_param, k_entries, X = self._init_train(X)
+        learned_param = np.zeros((self.hyper_param["k"], X.shape[1]))  # Centroid matrix
         prev_param = np.zeros_like(learned_param)
+        X = np.c_[X, np.zeros((X.shape[0], 1))]  # Adding k column to X
+        k_entries = np.zeros(self.hyper_param["k"])  # Matrix for counting K samples
         converged = False
         iter = 0
 
@@ -625,20 +610,87 @@ class kmean(ml_class):
             converged = True
             for k in range(self.hyper_param["k"]):
                 diff = np.linalg.norm(learned_param[k] - prev_param[k])
-                if __debug__:
-                    print(f"    {k} | {diff}")
-
-                if converged and diff > self.hyper_param["threshold"]:
+                # if __debug__:
+                #     print(f"    Diff: {diff}")
+                if diff > self.hyper_param["threshold"]:
                     converged = False
+                    if __debug__:
+                        print(f"    {k} | {diff} | {k_entries[k]}")
+
+            # Reset k_entries
+            k_entries.fill(0)
 
         # Outside loop => trained
-        self.LEARNED = True
         if __debug__:
             print(f"Converged after {iter} iteration!")
 
+        self.learned_param = learned_param
+        self.TRAINED = True
+
     def predict(self, X: np.ndarray):
-        if not self.LEARNED:
+        if not self.TRAINED:
             raise NotTrainedError(
                 "This instances has not been trained."
                 "Please run 'train()' before calling 'predict()'."
             )
+
+        z = np.zeros(X.shape[0])
+
+        for id, row in enumerate(X):
+            min_distance = float("inf")
+            for k in range(self.hyper_param["k"]):
+                diff = np.linalg.norm(row - self.learned_param[k])
+                if diff < min_distance:
+                    min_distance = diff
+                    z[id] = k
+
+        return z
+
+    def visualize_clusters(self, X, z):
+        """
+        Visualizes the clustering results.
+
+        Parameters:
+        - X: numpy array of shape (n_samples, 2), the dataset.
+        - z: list or array of length n_samples, cluster assignments.
+        - centroids: numpy array of shape (n_clusters, 2), cluster centroids.
+        """
+        centroids = self.learned_param
+
+        # Convert cluster assignments to numpy array for indexing
+        z = np.array(z)
+
+        # Number of clusters
+        n_clusters = len(centroids)
+
+        # Create a color map for the clusters
+        colors = plt.cm.get_cmap("tab10", n_clusters)
+
+        # Plot the data points, colored by their cluster assignments
+        for k in range(n_clusters):
+            cluster_points = X[z == k]
+            plt.scatter(
+                cluster_points[:, 0],
+                cluster_points[:, 1],
+                label=f"Cluster {k}",
+                alpha=0.7,
+                color=colors(k),
+            )
+
+        # Plot the centroids
+        plt.scatter(
+            centroids[:, 0],
+            centroids[:, 1],
+            c="black",
+            marker="X",
+            s=100,
+            label="Centroids",
+        )
+
+        # Add legend and axis labels
+        plt.legend()
+        plt.xlabel("Feature 1")
+        plt.ylabel("Feature 2")
+        plt.title("KMeans Clustering Visualization")
+        plt.grid(True)
+        plt.show()
