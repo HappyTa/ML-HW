@@ -1,3 +1,23 @@
+import numpy as np
+
+
+class NotTrainedError(ValueError, AttributeError):
+    """Exception calss to raise if estimator is used before training"""
+
+
+class ml_class:
+    LEARNED = False
+
+    def __init__(self, hyper_param: dict) -> None:
+        self.hyper_param = hyper_param
+
+    def train(self, X: np.ndarray, y: np.ndarray) -> None:  # pyright: ignore[y]
+        pass
+
+    def predict(self, X: np.ndarray):  # pyright: ignore[y]
+        pass
+
+
 class node:
     def __init__(self, node_type=0, value=None):
         """Initialize a node object

@@ -1,19 +1,9 @@
+from warnings import warn
 from pandas.core.interchange.dataframe_protocol import enum
 from scipy.special import expit as sigmoid
-from utils import node
+from utils import node, ml_class, NotTrainedError
 import numpy as np
 import math
-
-
-class ml_class:
-    def __init__(self, hyper_param: dict) -> None:
-        self.hyper_param = hyper_param
-
-    def train(self, X: np.ndarray, y: np.ndarray) -> None:  # pyright: ignore[y]
-        pass
-
-    def predict(self, y: np.ndarray):  # pyright: ignore[y]
-        pass
 
 
 class linear_regression:
@@ -564,10 +554,10 @@ class kmean(ml_class):
 
         super().__init__(hyper_param)
 
-    def __initialize(self, X: np.ndarray):
+    def _init_train(self, X: np.ndarray):
         # create learned parameter holder
         k = self.hyper_param["k"]
-        learned_param = np.zeros((k, X.shape[0]))
+        learned_param = np.zeros((k, X.shape[1]))
 
         # adding cluster tracker to X
         X = np.c_[X, np.zeros((X.shape[0], 1))]
@@ -580,20 +570,75 @@ class kmean(ml_class):
             curr_row[-1] = assigned_cluster
             k_entries[assigned_cluster] += 1
 
-        return learned_param, k_entries
+        return learned_param, k_entries, X
 
     def train(self, X: np.ndarray, y: np.ndarray) -> None:
         # initialize
-        learned_param, k_entries = self.__initialize(X)
-
+        learned_param, k_entries, X = self._init_train(X)
+        prev_param = np.zeros_like(learned_param)
         converged = False
+        iter = 0
 
         # finding centroids till convergence
         # the comment above belong in a sci-fi book or movie
         while not converged:
-            
+            # Update iteration counter
+            iter += 1
 
-        print("test")
+            if __debug__:
+                print(iter)
 
-    def predict(self, y: np.ndarray):
-        return super().predict(y)
+            # Check if we've reach the max number of iteration
+            if iter >= self.hyper_param["max_iter"]:
+                warn(
+                    "Maximum number of iteration reach without converging."
+                    f"Please consider increaseing the maximum number of iteration. (current: {self.hyper_param["max_iter"]})"
+                )
+                break
+
+            # backup learned_param
+            np.copyto(prev_param, learned_param)
+            learned_param.fill(0)
+
+            # Calculate centroids
+            for row in X:
+                assigned_cluster = int(row[-1])
+                k_entries[assigned_cluster] += 1
+                learned_param[assigned_cluster] += row[:-1]
+
+            # Normalize
+            for k in range(self.hyper_param["k"]):
+                if k_entries[k] > 0:  # Add this to avoid dividing by 0
+                    learned_param[k] /= k_entries[k]
+
+            # Reassign Cluster base on distance
+            for row in X:
+                min_distance = float("inf")
+                for k in range(self.hyper_param["k"]):
+                    distance = np.linalg.norm(row[:-1] - learned_param[k])
+
+                    if distance < min_distance:
+                        min_distance = distance
+                        row[-1] = k
+
+            # Check for convergence
+            converged = True
+            for k in range(self.hyper_param["k"]):
+                diff = np.linalg.norm(learned_param[k] - prev_param[k])
+                if __debug__:
+                    print(f"    {k} | {diff}")
+
+                if converged and diff > self.hyper_param["threshold"]:
+                    converged = False
+
+        # Outside loop => trained
+        self.LEARNED = True
+        if __debug__:
+            print(f"Converged after {iter} iteration!")
+
+    def predict(self, X: np.ndarray):
+        if not self.LEARNED:
+            raise NotTrainedError(
+                "This instances has not been trained."
+                "Please run 'train()' before calling 'predict()'."
+            )
