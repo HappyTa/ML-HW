@@ -646,51 +646,97 @@ class kmean(ml_class):
 
         return z
 
-    def visualize_clusters(self, X, z):
-        """
-        Visualizes the clustering results.
 
-        Parameters:
-        - X: numpy array of shape (n_samples, 2), the dataset.
-        - z: list or array of length n_samples, cluster assignments.
-        - centroids: numpy array of shape (n_clusters, 2), cluster centroids.
-        """
-        centroids = self.learned_param
+class kmean_semi(ml_class):
+    def __init__(self, hyper_param: dict):
+        hyper_param = dict((k.lower(), v) for k, v in hyper_param.items())
+        if "k" not in hyper_param.keys():
+            raise ValueError("Missing K in hyperparameter.")
+        if "threshold" not in hyper_param.keys():
+            raise ValueError("Missing threshold value in hyperparameter.")
+        if "max_iter" not in hyper_param.keys():
+            raise ValueError("Missing max_iter in hyperparameter.")
 
-        # Convert cluster assignments to numpy array for indexing
-        z = np.array(z)
+        for key, value in hyper_param.items():
+            if value < 0:
+                raise ValueError(f"{key} cannot be negative.")
+            if key == "k":
+                if not isinstance(value, int):
+                    raise TypeError(f"{key} must be of integer type.")
 
-        # Number of clusters
-        n_clusters = len(centroids)
+        super().__init__(hyper_param)
 
-        # Create a color map for the clusters
-        colors = plt.cm.get_cmap("tab10", n_clusters)
+    def train(self, X: np.ndarray, y: np.ndarray) -> None:
+        # initialize
+        learned_param = np.zeros((self.hyper_param["k"], X.shape[1]))  # Centroid matrix
+        prev_param = np.zeros_like(learned_param)
+        X = np.c_[X, np.zeros((X.shape[0], 1))]  # Adding k column to X
+        k_entries = np.zeros(self.hyper_param["k"])  # Matrix for counting K samples
+        converged = False
+        iter = 0
 
-        # Plot the data points, colored by their cluster assignments
-        for k in range(n_clusters):
-            cluster_points = X[z == k]
-            plt.scatter(
-                cluster_points[:, 0],
-                cluster_points[:, 1],
-                label=f"Cluster {k}",
-                alpha=0.7,
-                color=colors(k),
-            )
+        # finding centroids till convergence
+        # the comment above belong in a sci-fi book or movie
+        while not converged:
+            # Update iteration counter
+            iter += 1
 
-        # Plot the centroids
-        plt.scatter(
-            centroids[:, 0],
-            centroids[:, 1],
-            c="black",
-            marker="X",
-            s=100,
-            label="Centroids",
-        )
+            if __debug__:
+                print(iter)
 
-        # Add legend and axis labels
-        plt.legend()
-        plt.xlabel("Feature 1")
-        plt.ylabel("Feature 2")
-        plt.title("KMeans Clustering Visualization")
-        plt.grid(True)
-        plt.show()
+            # Check if we've reach the max number of iteration
+            if iter >= self.hyper_param["max_iter"]:
+                warn(
+                    "Maximum number of iteration reach without converging."
+                    f"Please consider increaseing the maximum number of iteration. (current: {self.hyper_param["max_iter"]})"
+                )
+                break
+
+            # backup learned_param
+            np.copyto(prev_param, learned_param)
+            learned_param.fill(0)
+
+            # Calculate centroids
+            for row in X:
+                assigned_cluster = int(row[-1])
+                k_entries[assigned_cluster] += 1
+                learned_param[assigned_cluster] += row[:-1]
+
+            # Normalize
+            for k in range(self.hyper_param["k"]):
+                if k_entries[k] > 0:  # Add this to avoid dividing by 0
+                    learned_param[k] /= k_entries[k]
+
+            # Reassign Cluster base on distance
+            for row in X:
+                min_distance = float("inf")
+                for k in range(self.hyper_param["k"]):
+                    distance = np.linalg.norm(row[:-1] - learned_param[k])
+
+                    if distance < min_distance:
+                        min_distance = distance
+                        row[-1] = k
+
+            # Check for convergence
+            converged = True
+            for k in range(self.hyper_param["k"]):
+                diff = np.linalg.norm(learned_param[k] - prev_param[k])
+                # if __debug__:
+                #     print(f"    Diff: {diff}")
+                if diff > self.hyper_param["threshold"]:
+                    converged = False
+                    if __debug__:
+                        print(f"    {k} | {diff} | {k_entries[k]}")
+
+            # Reset k_entries
+            k_entries.fill(0)
+
+        # Outside loop => trained
+        if __debug__:
+            print(f"Converged after {iter} iteration!")
+
+        self.learned_param = learned_param
+        self.TRAINED = True
+
+    def predict(self, X: np.ndarray) -> np.ndarray:
+        return super().predict(X)()

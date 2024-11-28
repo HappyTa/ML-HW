@@ -156,7 +156,6 @@ def test_kmean():
     km = kmean(hyper_param)
     km.train(X_train, y_train)
     pred_val = km.predict(X_test)
-    km.visualize_clusters(X_test, pred_val)
     sys.exit(0)
 
 
