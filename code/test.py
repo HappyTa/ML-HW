@@ -1,19 +1,30 @@
-import enum
 import sys
 
 import matplotlib.pyplot as plt
 import numpy as np
 from sklearn.datasets import fetch_california_housing
 
-from ml import decision_tree, linear_regression, kmean
+from ml import decision_tree, linear_regression, kmean, kmean_semi, pca
 
 
-def grab_data() -> tuple[np.ndarray, np.ndarray]:
+def grab_data(test_size=None):
     # Fetch data
     data = fetch_california_housing(as_frame=True)
     X = data.data.to_numpy()  # type: ignore
     y = data.target.to_numpy()  # type: ignore
-    return X, y
+    if test_size is None:
+        return X, y
+
+    indices = np.arange(X.shape[0])
+    # Split based on the test size
+    split_idx = int(X.shape[0] * (1 - test_size))
+    train_indices, test_indices = indices[:split_idx], indices[split_idx:]
+
+    # Split the features and labels
+    X_train, X_test = X[train_indices], X[test_indices]
+    y_train, y_test = y[train_indices], y[test_indices]
+
+    return X_train, X_test, y_train, y_test
 
 
 def split_dataset(
@@ -39,7 +50,7 @@ def split_dataset(
 
 def test_linear_regression():
     """this function tests the linear regression model using MLE and MAP"""
-    X, y = grab_data()
+    X, y = grab_data()  # type: ignore
     training_percentages = [0.1, 0.2, 0.4, 0.6, 0.8, 0.999]
     rmse_mle_list = []
     rmse_map_list = []
@@ -123,7 +134,7 @@ def test_nodes():
     dt = decision_tree()
     # X = np.random.randint(1, 10, size=(100, 4))
     # y = np.random.randint(0, 2, size=(100, 1))
-    X, y = grab_data()
+    X, y = grab_data()  # type: ignore
 
     test_size = 1 - 0.8
     indices = np.arange(X.shape[0])
@@ -140,7 +151,7 @@ def test_nodes():
 
 
 def test_kmean():
-    X, y = grab_data()
+    X, y = grab_data()  # type: ignore
 
     test_size = 1 - 0.8
     indices = np.arange(X.shape[0])
@@ -159,6 +170,32 @@ def test_kmean():
     sys.exit(0)
 
 
+def test_kmean_semi():
+    test_size = 1 - 0.8
+
+    X_train, X_test, y_train, y_test = grab_data(test_size=test_size)  # type: ignore
+
+    hyper_param = {"K": 5, "threshold": 1e-4, "max_iter": 400}
+    km = kmean_semi(hyper_param)
+    km.train(X_train, y_train)
+    pred_val = km.predict(X_test)
+    sys.exit(0)
+
+
+def test_pca():
+    test_size = 1 - 0.8
+
+    X_train, X_test, y_train, y_test = grab_data(test_size=test_size)  # type: ignore
+
+    hyper_param = {"k": 2}
+    # hyper_param = {"k": -1}
+    # hyper_param = {"k": X_train.shape[0] + 1}
+    # hyper_param = {"k": X_train.shape[1] + 1}
+
+    _pca = pca(hyper_param)
+    _pca.train(X_train, y_train)
+
+
 if __name__ == "__main__":
     # test_linear_regression()
-    test_kmean()
+    test_pca()

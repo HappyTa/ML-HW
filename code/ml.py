@@ -1,10 +1,8 @@
 from warnings import warn
-from pandas.core.interchange.dataframe_protocol import enum
 from scipy.special import expit as sigmoid
-from utils import node, ml_class, NotTrainedError
+from utils import node, ml_super_class, NotTrainedError, standardize_data, un_standardize_data()
 import numpy as np
 import math
-import matplotlib.pyplot as plt
 
 
 class linear_regression:
@@ -536,7 +534,7 @@ class decision_tree:
         return current_node
 
 
-class kmean(ml_class):
+class kmean(ml_super_class):
     def __init__(self, hyper_param: dict):
         hyper_param = dict((k.lower(), v) for k, v in hyper_param.items())
         if "k" not in hyper_param.keys():
@@ -563,6 +561,11 @@ class kmean(ml_class):
         k_entries = np.zeros(self.hyper_param["k"])  # Matrix for counting K samples
         converged = False
         iter = 0
+
+        # Randomly assign classes to X
+        for row in X:
+            assigned_cluster = np.random.randint(0, self.hyper_param["k"])
+            row[-1] = assigned_cluster
 
         # finding centroids till convergence
         # the comment above belong in a sci-fi book or movie
@@ -647,7 +650,7 @@ class kmean(ml_class):
         return z
 
 
-class kmean_semi(ml_class):
+class kmean_semi(ml_super_class):
     def __init__(self, hyper_param: dict):
         hyper_param = dict((k.lower(), v) for k, v in hyper_param.items())
         if "k" not in hyper_param.keys():
@@ -675,6 +678,16 @@ class kmean_semi(ml_class):
         converged = False
         iter = 0
 
+        # New stuff
+        has_label = ~np.isnan(y)  # Randomly assign classes to X
+
+        for id, row in enumerate(X):
+            # int("inf") represent a row without a label
+            if has_label[id]:
+                row[-1] = y[id]
+            else:
+                row[-1] = np.random.randint(0, self.hyper_param["k"])
+
         # finding centroids till convergence
         # the comment above belong in a sci-fi book or movie
         while not converged:
@@ -697,8 +710,10 @@ class kmean_semi(ml_class):
             learned_param.fill(0)
 
             # Calculate centroids
-            for row in X:
+            for id, row in enumerate(X):
                 assigned_cluster = int(row[-1])
+                if assigned_cluster not in k_entries:
+                    continue
                 k_entries[assigned_cluster] += 1
                 learned_param[assigned_cluster] += row[:-1]
 
@@ -708,7 +723,11 @@ class kmean_semi(ml_class):
                     learned_param[k] /= k_entries[k]
 
             # Reassign Cluster base on distance
-            for row in X:
+            for id, row in enumerate(X):
+                # Skip row if y already gave it a label
+                if has_label[id]:
+                    continue
+
                 min_distance = float("inf")
                 for k in range(self.hyper_param["k"]):
                     distance = np.linalg.norm(row[:-1] - learned_param[k])
@@ -738,5 +757,80 @@ class kmean_semi(ml_class):
         self.learned_param = learned_param
         self.TRAINED = True
 
-    def predict(self, X: np.ndarray) -> np.ndarray:
-        return super().predict(X)()
+    def predict(self, X: np.ndarray):
+        if not self.TRAINED:
+            raise NotTrainedError(
+                "This instances has not been trained."
+                "Please run 'train()' before calling 'predict()'."
+            )
+
+        z = np.zeros(X.shape[0])
+
+        for id, row in enumerate(X):
+            min_distance = float("inf")
+            for k in range(self.hyper_param["k"]):
+                diff = np.linalg.norm(row - self.learned_param[k])
+                if diff < min_distance:
+                    min_distance = diff
+                    z[id] = k
+
+        return z
+
+
+class pca(ml_super_class):
+    def __init__(self, hyper_param: dict):
+        hyper_param = dict((k.lower(), v) for k, v in hyper_param.items())
+        if len(hyper_param) != 1:
+            raise ValueError("hyper_param must contain exactly one key.")
+        # k = number of pca
+        if "k" not in hyper_param.keys():
+            raise ValueError("Missing K in hyperparameter.")
+        if hyper_param["k"] < 0:
+            raise ValueError("K cannot be negative.")
+
+        super().__init__(hyper_param)
+
+    def train(self, X: np.ndarray, y: np.ndarray):
+        if self.hyper_param["k"] > X.shape[1] or self.hyper_param["k"] > X.shape[0]:
+            raise ValueError("K cannot be greater than the number of features.")
+
+        mean = np.mean(X, axis=0)
+        std = np.std(X, axis=0)
+
+        print("Standardizing data...")
+        X_standardized = standardize_data(X, mean, std)
+
+        # get SVD
+        U, S, Vh = np.linalg.svd(X_standardized, full_matrices=True)
+
+        # get eigenvectors
+        if U.shape[0] == U.shape[1] == X.shape[1]:
+            eigenvectors = U.T
+        elif Vh.shape[0] == Vh.shape[1] == X.shape[1]:
+            eigenvectors = Vh
+        else:
+            raise ValueError("Neither U or Vh contain the eigenvectors.")
+
+        self.parameters = eigenvectors[: self.hyper_param["k"],]
+        self.TRAINED = True
+
+    def predict(self, X: np.ndarray):
+        if not self.TRAINED:
+            raise NotTrainedError(
+                "This instances has not been trained."
+                "Please run 'train()' before calling 'predict()'."
+            )
+
+        # Standardize X
+        mean = np.mean(X, axis=0)
+        std = np.std(X, axis=0)
+
+        print("Standardizing data...")
+        X_standardized = standardize_data(X, mean, std)
+
+        # Compress X
+        X_compress = self.parameters @ X_standardized.T
+
+        # DEcompress X
+        X_decompress = self.parameters.T @ X_compress
+        return  un_standardize_data(X_decompress, mean, std)

@@ -5,8 +5,8 @@ class NotTrainedError(ValueError, AttributeError):
     """Exception calss to raise if estimator is used before training"""
 
 
-class ml_class:
-    LEARNED = False
+class ml_super_class:
+    TRAINED = False
 
     def __init__(self, hyper_param: dict) -> None:
         self.hyper_param = hyper_param
@@ -59,3 +59,43 @@ class node:
         yield self
         for child in self.__children.values():
             yield from child.traverse()
+
+
+def standardize_data(X: np.ndarray, mean: np.ndarray, std: np.ndarray) -> np.ndarray:
+    """Standardize the data to have zero mean and unit variance
+
+    keywords:
+    X (np.ndarray) -- the original data
+    mean (np.ndarray) -- the mean of the original data
+    std (np.ndarray) -- the standard deviation of the original data
+    """
+
+    mean_tile = np.tile(mean, (X.shape[0], 1))
+    X_centered = X - mean_tile
+
+    std_inv = np.linalg.inv(std)
+    std_inv_diag = np.diag(std_inv)
+
+    return np.dot(X_centered, std_inv_diag)
+
+
+def un_standardize_data(X: np.ndarray, mean: np.ndarray, std: np.ndarray) -> np.ndarray:
+    """Calculate the original data from the scaled data
+
+    keywords:
+    X (np.ndarray) -- the scaled data
+    mean (np.ndarray) -- the mean of the original data
+    std (np.ndarray) -- the standard deviation of the original data
+    """
+
+    # get the diagonal elements of the std matrix
+    std_diag = np.diag(std)
+
+    # Scale X by the diagonal elements of the std matrix
+    X_scaled = X @ std_diag
+
+    # tile mean to the shape of X_scaled
+    mean_tiled = np.tile(mean, (X_scaled.shape[0], 1))
+
+    # Return original X
+    return X_scaled + mean_tiled
